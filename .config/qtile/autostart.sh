@@ -1,7 +1,11 @@
 #! /bin/bash
-picom -b &
-feh --bg-fill ~/Pictures/wallpaper.jpg &
-killall blueman-applet &
-blueman-applet &
-xss-lock -- i3lock -n -i ~/Pictures/wallpaper.jpg &
-dunst &
+insync&
+picom -b&
+feh --bg-fill ~/Pictures/wallpaper.png&
+dunst&
+redshift-gtk&
+blueman-applet&
+fusuma -d&
+nm-applet&
+mailspring -b&
+/usr/lib/mate-polkit/polkit-mate-authentication-agent-1&
