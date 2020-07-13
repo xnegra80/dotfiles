@@ -18,6 +18,7 @@ cp -rf ~/dotfiles/.config/nvim/ ~/.config/nvim
 
 echo "Install vim plugins"
 nvim --headless +PlugInstall +qall
+brew install ripgrep
 
 echo "Install coc extensions"
 cp -rf ~/dotfiles/.config/coc/ ~/.config/coc
