@@ -15,6 +15,11 @@ curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
 
 echo "Get init.vim"
 cp -rf ~/dotfiles/.config/nvim/ ~/.config/nvim
+
+echo "Install vim plugins"
+nvim --headless +PlugInstall +qall
+
+echo "Install coc extensions"
 cp -rf ~/dotfiles/.config/coc/ ~/.config/coc
 cd ~/.config/coc/extensions/
 yarn install
