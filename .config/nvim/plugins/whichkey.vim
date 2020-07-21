@@ -31,6 +31,8 @@ let g:which_key_map['v'] = [ '<C-W>v', 'split right']
 let g:which_key_map.g['j'] = ['<plug>(signify-next-hunk)', 'next change']
 let g:which_key_map.g['k'] = ['<plug>(signify-prev-hunk)', 'previous change']
 let g:which_key_map.g['s'] = [':G', 'status']
+let g:which_key_map.g['d'] = [':Gvdiffsplit', 'diff split']
+let g:which_key_map.g['b'] = [':Gblame', 'blame']
 let g:which_key_map.g['f'] = [':diffget //2', 'accept left']
 let g:which_key_map.g['h'] = [':diffget //3', 'accept right']
 

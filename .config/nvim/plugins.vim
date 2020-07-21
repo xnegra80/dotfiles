@@ -30,7 +30,7 @@ call plug#begin('~/.config/nvim/autoload/plugged')
     Plug 'preservim/nerdtree'
     Plug 'Xuyuanp/nerdtree-git-plugin'
     "
-    Plug 'liuchengxu/vim-which-key' 
- 
+    Plug 'liuchengxu/vim-which-key'
+    Plug 'jiangmiao/auto-pairs'
 
 call plug#end()

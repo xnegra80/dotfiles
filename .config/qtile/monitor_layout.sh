@@ -54,7 +54,7 @@ do
         then
             TILES[$index]="Dual Screen ${MONITORS[$entry_a]} -> ${MONITORS[$entry_b]}"
             COMMANDS[$index]="xrandr --output ${MONITORS[$entry_a]} --auto \
-                              --output ${MONITORS[$entry_b]} --auto --left-of ${MONITORS[$entry_a]}"
+                              --output ${MONITORS[$entry_b]} --auto --above ${MONITORS[$entry_a]}"
 
             index+=1
         fi
@@ -96,4 +96,6 @@ function gen_entries()
 SEL=$( gen_entries | rofi -dmenu -p "Monitor Setup" -a 0 -no-custom  | awk '{print $1}' )
 
 # Call xrandr
-$( ${COMMANDS[$SEL]} )
+$( ${COMMANDS[$SEL]} ) & 
+feh --bg-fill ~/Pictures/wallpaper.png &
+qtile-cmd -o cmd -f restart

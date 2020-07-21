@@ -36,13 +36,12 @@ set formatoptions-=cro                  " Stop newline continution of comments
 set colorcolumn=80                      " Adds vertical line at 80 characters
 set noshowmode                          " Hides the --MODE--"
 set clipboard=unnamedplus               " Copy paste between vim and everything else
-
+set autochdir
 au! BufWritePost $MYVIMRC source %      " auto source when writing to init.vm alternatively you can run :source $MYVIMRC
+autocmd Filetype php setlocal shiftwidth=4
 
 " You can't stop me
 cmap w!! w !sudo tee %
-" Quit vim on last buffer
-autocmd bufdelete * if len(filter(range(1, bufnr('$')), '! empty(bufname(v:val)) && buflisted(v:val)')) == 1 | q! | endif
 
 fun! TrimWhitespace()
     let l:save = winsaveview()

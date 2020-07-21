@@ -11,20 +11,12 @@ import re
 
 mod = "mod4"
 
-group_names = " "
+group_names = " a"
 
 
 @hook.subscribe.startup_once
 def autostart():
-  subprocess.Popen(os.path.expanduser('~/.config/qtile/autostart.sh'))
-
-
-def screenshot():
-  def f(qtile):
-    shot = subprocess.run(['maim'], stdout=subprocess.PIPE)
-    subprocess.run(['xclip', '-selection', 'clipboard', '-t',
-                    'image/png'], input=shot.stdout)
-  return f
+    subprocess.Popen(os.path.expanduser('~/.config/qtile/autostart.sh'))
 
 
 keys = [
@@ -48,11 +40,13 @@ keys = [
     Key([mod, "control"], "l", lazy.layout.grow_right()),
 
     Key([mod], "space", lazy.layout.next()),
-    Key([mod], "0", lazy.spawn([os.path.expanduser('~/.config/qtile/power.sh')])),
-    Key([mod, 'control'], "v", lazy.spawn(
+    Key([mod, 'control'], "v", lazy.group[group_names[9]].toscreen(
+        toggle=False), lazy.spawn(
         [os.path.expanduser('~/.config/qtile/vm.sh')])),
     Key([mod, "control"], "d", lazy.spawn(
         [os.path.expanduser('~/.config/qtile/monitor_layout.sh')])),
+    Key([mod, "control"], "p", lazy.spawn(
+        [os.path.expanduser('~/.config/qtile/power.sh')])),
     Key(
         [mod], "h",
         lazy.layout.grow(),
@@ -79,6 +73,18 @@ keys = [
         [mod], "f",
         lazy.window.toggle_fullscreen(),
     ),
+    # Monitors
+    Key([mod], "period",
+        lazy.next_screen(),
+        ),
+    Key([mod], "comma",
+        lazy.prev_screen(),
+        ),
+
+
+
+
+
     Key([mod], "Print", lazy.spawn('rofi-screenshot -s')),
     Key(
         [], "Print",
@@ -103,7 +109,6 @@ keys = [
     Key([mod, 'shift'], "Tab", lazy.prev_layout()),
     Key([mod, "shift"], "q", lazy.window.kill()),
     Key([mod, "shift"], "r", lazy.restart()),
-    Key([mod, "control"], "q", lazy.shutdown()),
 
     Key([mod], "d", lazy.spawn("rofi -show drun")),
     Key([mod, 'shift'], "d", lazy.spawn('rofi -show run')),
@@ -127,7 +132,7 @@ keys = [
 
     Key([mod], "c", lazy.group[group_names[4]].toscreen(
         toggle=False), lazy.spawn('code')),
-    
+
     Key([mod], "s", lazy.group[group_names[5]].toscreen(
         toggle=False), lazy.spawn('alacritty -e spt')),
 
@@ -145,7 +150,7 @@ groups = [
     Group(group_names[1], layout='monadtall'),
     Group(group_names[2], layout='monadtall'),
     Group(group_names[3], layout='matrix'),
-    Group(group_names[4], layout='monadtall'),
+    Group(group_names[4], layout='max'),
     Group(group_names[5], layout='monadtall'),
     Group(group_names[6], layout='monadtall'),
     Group(group_names[7], layout='max'),
@@ -154,13 +159,13 @@ groups = [
 ]
 
 for i, group in enumerate(groups, 1):
-  keys.extend([
-      Key([mod], str(i), lazy.group[group.name].toscreen()),
-      Key([mod, "shift"], str(i),
-          lazy.window.togroup(group.name, switch_group=True)),
-  ])
+    keys.extend([
+        Key([mod], str(i), lazy.group[group.name].toscreen()),
+        Key([mod, "shift"], str(i),
+            lazy.window.togroup(group.name, switch_group=True)),
+    ])
 
-layout_theme = {"border_width": 2,
+layout_theme = {"border_width": 0,
                 "margin": 2,
                 "border_focus": "bd93f9",
                 "border_normal": "44475a",
@@ -185,73 +190,85 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font='Cantwell, FontAwesome 5 Free, Font Awesome 5 Brands',
+    font='Roboto, Font Awesome 5 Free, Font Awesome 5 Brands',
     fontsize=12,
     padding=0,
     foreground='f8f8f2'
 )
 extension_defaults = widget_defaults.copy()
 
+
+def get_widgets():
+    return [
+        widget.GroupBox(urgent_alert_method='text',
+                        highlight_method='text', this_current_screen_border='bd93f9'),
+        widget.Spacer(length=10),
+        widget.WindowName(),
+        widget.Systray(),
+        widget.Spacer(length=10),
+        widget.CPUGraph(line_width=1, graph_color='50fa7b',
+                        border_width=0, fill_color='50fa7b'),
+        widget.MemoryGraph(line_width=1, graph_color='ff79c6',
+                           border_width=0, fill_color='ff79c6'),
+        widget.SwapGraph(line_width=1, graph_color='f1fa8c',
+                         border_width=0, fill_color='f1fa8c'),
+        widget.Spacer(length=10),
+        widget.TextBox(text=" ", foreground='8be9fd'),
+        widget.ThermalSensor(foreground='8be9fd'),
+        widget.Spacer(length=5),
+
+        widget.Spacer(length=5, background='44475a'),
+        widget.Backlight(backlight_name='intel_backlight',
+                         format='{percent: 2.0%}', foreground='ff79c6', background='44475a'),
+        widget.Spacer(length=5, background='44475a'),
+
+        widget.Spacer(length=5),
+        widget.Battery(
+            format='{char} {percent:2.0%}',
+            unknown_char='',
+            charge_char='',
+            empty_char='',
+            discharge_char='',
+            foreground='50fa7b'
+        ),
+        widget.Spacer(length=5),
+
+        widget.Spacer(length=5, background='44475a'),
+        widget.TextBox(text=" ", foreground='f1fa8c',
+                       background='44475a'),
+        widget.Volume(step=5, foreground='f1fa8c',
+                      background='44475a'),
+        widget.Spacer(length=5, background='44475a'),
+
+        widget.Spacer(length=5),
+        widget.Clock(format='%Y-%m-%d %a %I:%M %p'),
+        widget.Spacer(length=5),
+
+        widget.Spacer(length=5, background='44475a'),
+        widget.TextBox(text="⟳ ", background='44475a'),
+        widget.Pacman(execute='alacritty -e yay -Syu',
+                              background='44475a'),
+        widget.Spacer(length=5, background='44475a'),
+
+        widget.Spacer(length=5),
+        widget.CurrentLayoutIcon(scale=.45),
+    ]
+
+
 screens = [
     Screen(
-        top=bar.Bar(
-            [
-                widget.GroupBox(urgent_alert_method='text',
-                                highlight_method='text', this_current_screen_border='bd93f9'),
-                widget.Spacer(length=10),
-                widget.WindowName(),
-                widget.Systray(),
-                widget.Spacer(length=10),
-                widget.CPUGraph(line_width=1, graph_color='50fa7b',
-                                border_width=0, fill_color='50fa7b'),
-                widget.MemoryGraph(line_width=1, graph_color='ff79c6',
-                                   border_width=0, fill_color='ff79c6'),
-                widget.SwapGraph(line_width=1, graph_color='f1fa8c',
-                                 border_width=0, fill_color='f1fa8c'),
-                widget.Spacer(length=10),
-                widget.TextBox(text=" ", foreground='8be9fd'),
-                widget.ThermalSensor(foreground='8be9fd'),
-                widget.Spacer(length=5),
-
-                widget.Spacer(length=5, background='44475a'),
-                widget.Backlight(backlight_name='intel_backlight',
-                                 format='{percent: 2.0%}', foreground='ff79c6', background='44475a'),
-                widget.Spacer(length=5, background='44475a'),
-
-                widget.Spacer(length=5),
-                widget.Battery(
-                    format='{char} {percent:2.0%}',
-                    unknown_char='',
-                    charge_char='',
-                    empty_char='',
-                    discharge_char='',
-                    foreground='50fa7b'
-                ),
-                widget.Spacer(length=5),
-
-                widget.Spacer(length=5, background='44475a'),
-                widget.TextBox(text=" ", foreground='f1fa8c',
-                               background='44475a'),
-                widget.Volume(step=5, foreground='f1fa8c',
-                              background='44475a'),
-                widget.Spacer(length=5, background='44475a'),
-
-                widget.Spacer(length=5),
-                widget.Clock(format='%Y-%m-%d %a %I:%M %p'),
-                widget.Spacer(length=5),
-
-                widget.Spacer(length=5, background='44475a'),
-                widget.TextBox(text="⟳ ", background='44475a'),
-                widget.Pacman(execute='alacritty -e yay -Syu',
-                              background='44475a'),
-                widget.Spacer(length=5, background='44475a'),
-
-                widget.Spacer(length=5),
-                widget.CurrentLayoutIcon(scale=.45),
-            ],
-            24,
-            background='#282a36', opacity=.85
-        ),
+        top=bar.Bar(get_widgets(),
+                    24,
+                    background='#282a36', opacity=.85
+                    ),
+    ),
+    Screen(
+        bottom=bar.Bar(get_widgets(),
+                       24,
+                       background='#282a36', opacity=.85
+                       ),
+    ),
+    Screen(
     ),
 ]
 
@@ -313,7 +330,6 @@ floating_layout = layout.Floating(float_rules=[
     {"wmclass": "Oblogout"},
     {"wmclass": "Pavucontrol"},
     {"wmclass": "Skype"},
-    {"wmclass": "nvidia-settings"},
     {"wmclass": "Eog"},
     {"wmclass": "Rhythmbox"},
     {"wmclass": "obs"},
@@ -323,7 +339,7 @@ floating_layout = layout.Floating(float_rules=[
     {"wmclass": 'ssh-askpass'},
     {"wmclass": "Mlconfig"},
 ], **layout_theme)
-auto_fullscreen = False
+auto_fullscreen = True
 bring_front_click = False
 focus_on_window_activation = "smart"
 floating_types = ["notification", "toolbar", "splash", "dialog",

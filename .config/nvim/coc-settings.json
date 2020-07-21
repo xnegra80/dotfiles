@@ -1,11 +1,4 @@
 {
-  "coc.preferences.formatOnSaveFiletypes": [
-    "css",
-    "markdown",
-    "json",
-    "php",
-    "vim",
-    "js"
-  ]
+  "coc.preferences.formatOnSaveFiletypes": ["*"]
 }
 

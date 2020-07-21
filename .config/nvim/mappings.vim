@@ -22,8 +22,8 @@ nnoremap <tab> :bnext<cr>
 nnoremap <s-tab> :bprevious<cr>
 
 " ctrl + q to quit without saving
-nnoremap <c-q> :bd!<cr>
-inoremap <c-q> <esc>:bd!<cr>
+nnoremap <c-q> :bp\|bd! #<cr>
+inoremap <c-q> <esc>:bp\|bd! #<cr>
 
 " ctrl + p to search file
 nnoremap <c-p> :GFiles --cached --others<cr>
