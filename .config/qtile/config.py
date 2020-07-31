@@ -1,17 +1,32 @@
-from libqtile.config import Key, Screen, Group, Drag, Click
+from libqtile.config import Key, Screen, Group, Drag, Click, Match
 from libqtile.lazy import lazy
-from libqtile import layout, bar, widget, hook
+from libqtile import layout, bar, widget, hook, extension
 
 
 from typing import List
-
+from Xlib import display
+import custom_widget
 import os
 import subprocess
 import re
 
-mod = "mod4"
+# pylint: disable=maybe-no-member
 
-group_names = " a"
+mod = 'mod4'
+
+
+def get_color(key):
+    colors = dict(
+        primary='#bd93f9',
+        foreground='#f8f8f2',
+        background='#282a36',
+        grey='#44475a',
+        green='#50fa7b',
+        cyan='#8be9fd',
+        pink='#ff79c6',
+        yellow='#f1fa8c',
+    )
+    return colors[key]
 
 
 @hook.subscribe.startup_once
@@ -22,156 +37,177 @@ def autostart():
 keys = [
 
     # Switch between windows in current stack pane
-    Key([mod], "k", lazy.layout.up()),
-    Key([mod], "j", lazy.layout.down()),
-    Key([mod], "h", lazy.layout.left()),
-    Key([mod], "l", lazy.layout.right()),
+    Key([mod], 'k', lazy.layout.up()),
+    Key([mod], 'j', lazy.layout.down()),
+    Key([mod], 'h', lazy.layout.left()),
+    Key([mod], 'l', lazy.layout.right()),
 
     # Move windows up or down in current stack
-    Key([mod, "shift"], "k", lazy.layout.shuffle_up()),
-    Key([mod, "shift"], "j", lazy.layout.shuffle_down()),
-    Key([mod, "shift"], "h", lazy.layout.shuffle_left()),
-    Key([mod, "shift"], "l", lazy.layout.shuffle_right()),
+    Key([mod, 'shift'], 'k', lazy.layout.shuffle_up()),
+    Key([mod, 'shift'], 'j', lazy.layout.shuffle_down()),
+    Key([mod, 'shift'], 'h', lazy.layout.shuffle_left()),
+    Key([mod, 'shift'], 'l', lazy.layout.shuffle_right()),
 
     # Grow windows up or down in current stack
-    Key([mod, "control"], "k", lazy.layout.grow_up()),
-    Key([mod, "control"], "j", lazy.layout.grow_down()),
-    Key([mod, "control"], "h", lazy.layout.grow_left()),
-    Key([mod, "control"], "l", lazy.layout.grow_right()),
+    Key([mod, 'control'], 'k', lazy.layout.grow_up()),
+    Key([mod, 'control'], 'j', lazy.layout.grow_down()),
+    Key([mod, 'control'], 'h', lazy.layout.grow_left()),
+    Key([mod, 'control'], 'l', lazy.layout.grow_right()),
 
-    Key([mod], "space", lazy.layout.next()),
-    Key([mod, 'control'], "v", lazy.group[group_names[9]].toscreen(
-        toggle=False), lazy.spawn(
-        [os.path.expanduser('~/.config/qtile/vm.sh')])),
-    Key([mod, "control"], "d", lazy.spawn(
-        [os.path.expanduser('~/.config/qtile/monitor_layout.sh')])),
-    Key([mod, "control"], "p", lazy.spawn(
-        [os.path.expanduser('~/.config/qtile/power.sh')])),
+    Key([mod], 'space', lazy.layout.next()),
+
+    # rofi menus
     Key(
-        [mod], "h",
+        [mod, 'control'], 'v',
+        lazy.group['0'].toscreen(toggle=False),
+        lazy.run_extension(extension.CommandSet(commands={
+            ' Connect to Windows LTSC': 'virsh start win-vm & virt-viewer -f --domain-name win-vm & notify-send " VM connected"',
+            ' Disconnect from Windows LTSC': 'virsh managedsave win-vm & killall virt-viewer & killall libvirtd & notify-send " VM suspended"', }, dmenu_prompt='Virtual Machines'))),
+    Key(
+        [mod, 'control'], 'n',
+        lazy.spawn('networkmanager_dmenu')
+    ),
+    Key(
+        [mod, 'control'], 'c',
+        lazy.spawn('rofi -show calc')
+    ),
+    Key(
+        [mod, 'control'], 'd',
+        lazy.spawn(
+            [os.path.expanduser('~/.config/rofi/scripts/monitor-layout.sh')])
+    ),
+    Key([mod, 'control'], 'b', lazy.spawn('rofi-bluetooth')),
+    Key([], 'Print', lazy.spawn('rofi-screenshot')),
+    Key([mod], 'Print', lazy.spawn('rofi-screenshot -s')),
+    Key([mod, 'control'], 'p',
+        lazy.run_extension(extension.CommandSet(commands={
+            ' Lock': 'xset dpms force suspend; slock',
+            ' Shutdown': 'systemctl poweroff',
+            ' Reboot': 'systemctl reboot',
+            ' Suspend': 'systemctl suspend',
+        }, dmenu_prompt='Power'))),
+
+
+    Key(
+        [mod], 'h',
         lazy.layout.grow(),
         lazy.layout.increase_nmaster(),
     ),
     Key(
-        [mod], "l",
+        [mod], 'l',
         lazy.layout.shrink(),
         lazy.layout.decrease_nmaster(),
     ),
     Key(
-        [mod], "n",
+        [mod], 'n',
         lazy.layout.normalize(),
     ),
     # Key(
-    #     [mod], "m",
+    #     [mod], 'm',
     #     lazy.layout.maximize(),
     # ),
     Key(
-        [mod, "shift"], "f",
+        [mod, 'shift'], 'f',
         lazy.window.toggle_floating(),
     ),
     Key(
-        [mod], "f",
+        [mod], 'f',
         lazy.window.toggle_fullscreen(),
     ),
     # Monitors
-    Key([mod], "period",
+    Key([mod], 'period',
         lazy.next_screen(),
         ),
-    Key([mod], "comma",
+    Key([mod], 'comma',
         lazy.prev_screen(),
         ),
 
 
-
-
-
-    Key([mod], "Print", lazy.spawn('rofi-screenshot -s')),
     Key(
-        [], "Print",
-        lazy.spawn('rofi-screenshot')
-    ),
-    Key(
-        [mod, "shift"], "space",
+        [mod, 'shift'], 'space',
         lazy.layout.rotate(),
         lazy.layout.flip(),
     ),
-    Key([mod], "space", lazy.layout.next()),
+    Key([mod], 'space', lazy.layout.next()),
 
     # XF86 Buttons
-    Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +5%")),
-    Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 5%-")),
-    Key([], "XF86AudioRaiseVolume", lazy.widget['volume'].increase_vol()),
-    Key([], "XF86AudioLowerVolume", lazy.widget['volume'].decrease_vol()),
-    Key([], "XF86AudioMute", lazy.widget['volume'].mute()),
+    Key([], 'XF86MonBrightnessUp', lazy.spawn('brightnessctl set +5%')),
+    Key([], 'XF86MonBrightnessDown', lazy.spawn('brightnessctl set 5%-')),
+    Key([], 'XF86AudioRaiseVolume', lazy.widget['volume'].increase_vol()),
+    Key([], 'XF86AudioLowerVolume', lazy.widget['volume'].decrease_vol()),
+    Key([], 'XF86AudioMute', lazy.widget['volume'].mute()),
 
-    Key([mod, "shift"], "Return", lazy.layout.toggle_split()),
-    Key([mod], "Tab", lazy.next_layout()),
-    Key([mod, 'shift'], "Tab", lazy.prev_layout()),
-    Key([mod, "shift"], "q", lazy.window.kill()),
-    Key([mod, "shift"], "r", lazy.restart()),
+    Key([mod, 'shift'], 'Return', lazy.layout.toggle_split()),
+    Key([mod], 'Tab', lazy.next_layout()),
+    Key([mod, 'shift'], 'Tab', lazy.prev_layout()),
+    Key([mod, 'shift'], 'q', lazy.window.kill()),
+    Key([mod, 'shift'], 'r', lazy.restart()),
 
-    Key([mod], "d", lazy.spawn("rofi -show drun")),
-    Key([mod, 'shift'], "d", lazy.spawn('rofi -show run')),
-
-
-    Key([mod], "Return", lazy.spawn("alacritty")),
-
-    Key([mod], "e", lazy.spawn('caja')),
-    Key([mod, "shift"], "e", lazy.spawn('sudo caja')),
-    Key([mod, "control"], "e", lazy.spawn('ranger')),
-    Key([mod], "i", lazy.spawn('killall insync'), lazy.spawn('insync start')),
-    Key([mod], "v", lazy.spawn('pavucontrol')),
-    Key([mod, 'shift'], "t", lazy.spawn('sudo timeshift')),
+    Key([mod], 'd', lazy.spawn('rofi -show drun')),
+    Key([mod, 'shift'], 'd', lazy.spawn('rofi -show run')),
 
 
-    Key([mod], "m", lazy.group[group_names[1]].toscreen(
+    Key([mod], 'Return', lazy.spawn('alacritty')),
+
+    Key([mod], 'e', lazy.spawn('caja')),
+    Key([mod, 'shift'], 'e', lazy.spawn('sudo caja')),
+    Key([mod], 'l', lazy.spawn('alacritty -e ranger')),
+    Key([mod], 'i', lazy.spawn('killall insync'), lazy.spawn('insync start')),
+    Key([mod], 'v', lazy.spawn('pavucontrol')),
+    Key([mod, 'shift'], 't', lazy.spawn('sudo timeshift')),
+
+
+    Key([mod], 'm', lazy.group['1'].toscreen(
         toggle=False), lazy.spawn('mailspring')),
 
-    Key([mod], "w", lazy.group[group_names[2]].toscreen(
+    Key([mod], 'w', lazy.group['2'].toscreen(
         toggle=False), lazy.spawn('vivaldi-stable')),
 
-    Key([mod], "c", lazy.group[group_names[4]].toscreen(
+    Key([mod], 'c', lazy.group['4'].toscreen(
         toggle=False), lazy.spawn('code')),
 
-    Key([mod], "s", lazy.group[group_names[5]].toscreen(
-        toggle=False), lazy.spawn('alacritty -e spt')),
+    Key(
+        [mod], 's',
+        lazy.spawn('alacritty --title spt -e spt'),
+        lazy.group['5'].toscreen(toggle=False)
+    ),
 
-    Key([mod], "t", lazy.group[group_names[7]].toscreen(
+    Key([mod], 't', lazy.group['7'].toscreen(
         toggle=False), lazy.spawn('tableplus')),
-    Key([mod], "p", lazy.group[group_names[7]].toscreen(
+    Key([mod], 'p', lazy.group['7'].toscreen(
         toggle=False), lazy.spawn('postman')),
 
-    Key([mod], "r", lazy.group[group_names[9]].toscreen(
+    Key([mod], 'r', lazy.group['9'].toscreen(
         toggle=False), lazy.spawn('remmina')),
 ]
 
-
 groups = [
-    Group(group_names[1], layout='monadtall'),
-    Group(group_names[2], layout='monadtall'),
-    Group(group_names[3], layout='matrix'),
-    Group(group_names[4], layout='max'),
-    Group(group_names[5], layout='monadtall'),
-    Group(group_names[6], layout='monadtall'),
-    Group(group_names[7], layout='max'),
-    Group(group_names[8], layout='max'),
-    Group(group_names[9], layout='monadtall'),
+    Group('1', label='', layout='monadtall',
+          matches=[Match(wm_class=['ferdi'])]),
+    Group('2', label='', layout='monadtall'),
+    Group('3', label='', layout='matrix'),
+    Group('4', label='', layout='max'),
+    Group('5', label='', layout='monadtall', matches=[Match(['spt'])]),
+    Group('6', label='', layout='monadtall'),
+    Group('7', label='', layout='max'),
+    Group('8', label='', layout='max'),
+    Group('9', label='', layout='monadtall'),
+    Group('0', label='', layout='monadtall'),
 ]
 
-for i, group in enumerate(groups, 1):
+for i in range(10):
     keys.extend([
-        Key([mod], str(i), lazy.group[group.name].toscreen()),
-        Key([mod, "shift"], str(i),
-            lazy.window.togroup(group.name, switch_group=True)),
+        Key([mod], str(i), lazy.group[str(i)].toscreen()),
+        Key([mod, 'shift'], str(i),
+            lazy.window.togroup(str(i), switch_group=True)),
     ])
 
-layout_theme = {"border_width": 0,
-                "margin": 2,
-                "border_focus": "bd93f9",
-                "border_normal": "44475a",
-                "single_border_width": 0,
-                "single_margin": 0
-                }
+layout_theme = dict(
+    border_width=0,
+    margin=2,
+    single_border_width=0,
+    single_margin=0
+)
 
 layouts = [
     # layout.Stack(num_stacks=2),
@@ -190,159 +226,187 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font='Roboto, Font Awesome 5 Free, Font Awesome 5 Brands',
+    font='Roboto, Font Awesome 5 Pro, Font Awesome 5 Brands',
     fontsize=12,
-    padding=0,
-    foreground='f8f8f2'
+    padding=10,
+    foreground=get_color('foreground')
 )
+
 extension_defaults = widget_defaults.copy()
+
+
+def get_graph_theme(key):
+    return dict(
+        line_width=1,
+        graph_color=get_color(key),
+        border_width=0,
+        fill_color=get_color(key),
+        width=65,
+        samples=30
+    )
+
+
+def get_bluetooth():
+    result = custom_widget.call_script('~/.config/qtile/bluetooth.sh')
+    if result == 'No devices':
+        return ' '
+    elif not result:
+        return ''
+    else:
+        return ' ' + result
 
 
 def get_widgets():
     return [
-        widget.GroupBox(urgent_alert_method='text',
-                        highlight_method='text', this_current_screen_border='bd93f9'),
-        widget.Spacer(length=10),
+        widget.GroupBox(
+            urgent_alert_method='line',
+            highlight_method='line',
+            highlight_color=[get_color('background'), get_color('background')],
+            this_current_screen_border=get_color('primary'),
+            other_current_screen_border=get_color('cyan'),
+            this_screen_border=get_color('yellow'),
+            other_screen_border=get_color('cyan'),
+            inactive=get_color('yellow'),
+            disable_drag=True,
+            borderwidth=2,
+            spacing=0,
+            padding=3,
+        ),
         widget.WindowName(),
-        widget.Systray(),
-        widget.Spacer(length=10),
-        widget.CPUGraph(line_width=1, graph_color='50fa7b',
-                        border_width=0, fill_color='50fa7b'),
-        widget.MemoryGraph(line_width=1, graph_color='ff79c6',
-                           border_width=0, fill_color='ff79c6'),
-        widget.SwapGraph(line_width=1, graph_color='f1fa8c',
-                         border_width=0, fill_color='f1fa8c'),
-        widget.Spacer(length=10),
-        widget.TextBox(text=" ", foreground='8be9fd'),
-        widget.ThermalSensor(foreground='8be9fd'),
-        widget.Spacer(length=5),
-
-        widget.Spacer(length=5, background='44475a'),
-        widget.Backlight(backlight_name='intel_backlight',
-                         format='{percent: 2.0%}', foreground='ff79c6', background='44475a'),
-        widget.Spacer(length=5, background='44475a'),
-
-        widget.Spacer(length=5),
+        widget.Systray(padding=3),
+        widget.GenPollText(
+            func=get_bluetooth,
+            foreground=get_color('cyan'),
+            update_interval=1
+        ),
+        custom_widget.Wlan(
+            foreground=get_color('green'),
+            interface='wlp0s20f3',
+            format='{icon} {essid}'),
+        widget.CPUGraph(**get_graph_theme('pink')),
+        widget.MemoryGraph(**get_graph_theme('yellow')),
+        widget.SwapGraph(**get_graph_theme('primary')),
+        custom_widget.ThermalSensor(
+            width=70,
+            foreground=get_color('cyan'),
+            threshold=60
+        ),
+        widget.Backlight(
+            width=65,
+            format=' {percent: 2.0%}',
+            foreground=get_color('pink'),
+            background=get_color('grey'),
+            backlight_name='intel_backlight'
+        ),
         widget.Battery(
-            format='{char} {percent:2.0%}',
+            width=65,
+            format='{char}  {percent:2.0%}',
+            foreground=get_color('green'),
             unknown_char='',
-            charge_char='',
+            charge_char='',
             empty_char='',
             discharge_char='',
-            foreground='50fa7b'
+            full_char='',
+            low_percentage=.2,
+            notify_below=.2,
+            update_interval=.2
         ),
-        widget.Spacer(length=5),
-
-        widget.Spacer(length=5, background='44475a'),
-        widget.TextBox(text=" ", foreground='f1fa8c',
-                       background='44475a'),
-        widget.Volume(step=5, foreground='f1fa8c',
-                      background='44475a'),
-        widget.Spacer(length=5, background='44475a'),
-
-        widget.Spacer(length=5),
+        custom_widget.Volume(
+            width=70,
+            foreground=get_color('yellow'),
+            background=get_color('grey'),
+            step=5
+        ),
         widget.Clock(format='%Y-%m-%d %a %I:%M %p'),
-        widget.Spacer(length=5),
-
-        widget.Spacer(length=5, background='44475a'),
-        widget.TextBox(text="⟳ ", background='44475a'),
-        widget.Pacman(execute='alacritty -e yay -Syu',
-                              background='44475a'),
-        widget.Spacer(length=5, background='44475a'),
-
-        widget.Spacer(length=5),
+        widget.CheckUpdates(
+            width=50,
+            custom_command='pikaur -Qu',
+            colour_have_updates=get_color('pink'),
+            colour_no_updates=get_color('primary'),
+            background=get_color('grey'),
+            display_format='  {updates}'
+        ),
         widget.CurrentLayoutIcon(scale=.45),
     ]
 
 
 screens = [
-    Screen(
-        top=bar.Bar(get_widgets(),
-                    24,
-                    background='#282a36', opacity=.85
-                    ),
-    ),
-    Screen(
-        bottom=bar.Bar(get_widgets(),
-                       24,
-                       background='#282a36', opacity=.85
-                       ),
-    ),
-    Screen(
-    ),
+    Screen(top=bar.Bar(get_widgets(), 24,
+                       background=get_color('background'), opacity=.85))
+    for _ in range(-1, display.Display().screen_count())
 ]
 
 # Drag floating layouts.
 mouse = [
-    Drag([mod], "Button1", lazy.window.set_position_floating(),
+    Drag([mod], 'Button1', lazy.window.set_position_floating(),
          start=lazy.window.get_position()),
-    Drag([mod, 'shift'], "Button1", lazy.window.set_size_floating(),
+    Drag([mod], 'Button2', lazy.window.set_size_floating(),
          start=lazy.window.get_size()),
-    Click([mod], "Button2", lazy.window.bring_to_front())
+    Click([mod], 'Button2', lazy.window.bring_to_front())
 ]
 
-dgroups_key_binder = None
-dgroups_app_rules = []  # type: List
 main = None
 follow_mouse_focus = False
 bring_front_click = False
 cursor_warp = False
 floating_layout = layout.Floating(float_rules=[
-    {"role": "EventDialog"},
-    {"role": "Msgcompose"},
-    {"role": "Preferences"},
-    {"role": "pop-up"},
-    {"role": "prefwindow"},
-    {"role": "task_dialog"},
-    {"wname": "Module"},
-    {"wname": "anydesk"},
-    {"wname": "galculator"},
-    {"wname": "Insync"},
-    {"wname": "Picture-in-picture"},
-    {"wname": "Search Dialog"},
-    {"wname": "Goto"},
-    {"wname": "IDLE Preferences"},
-    {"wname": "Sozi"},
-    {"wname": "Create new database"},
-    {"wname": "Preferences"},
-    {"wname": "File Transfer"},
-    {"wname": 'branchdialog'},
-    {"wname": 'pinentry'},
-    {"wname": 'confirm'},
-    {"wmclass": 'dialog'},
-    {"wmclass": 'blueman-manager'},
-    {"wmclass": 'download'},
-    {"wmclass": 'error'},
-    {"wmclass": 'file_progress'},
-    {"wmclass": 'notification'},
-    {"wmclass": 'splash'},
-    {"wmclass": 'toolbar'},
-    {"wmclass": 'confirmreset'},
-    {"wmclass": 'makebranch'},
-    {"wmclass": 'maketag'},
-    {"wmclass": 'Dukto'},
-    {"wmclass": 'Tilda'},
-    {"wmclass": "GoldenDict"},
-    {"wmclass": "Synapse"},
-    {"wmclass": "TelegramDesktop"},
-    {"wmclass": "notify"},
-    {"wmclass": "Lxappearance"},
-    {"wmclass": "Oblogout"},
-    {"wmclass": "Pavucontrol"},
-    {"wmclass": "Skype"},
-    {"wmclass": "Eog"},
-    {"wmclass": "Rhythmbox"},
-    {"wmclass": "obs"},
-    {"wmclass": "Gufw.py"},
-    {"wmclass": "Catfish"},
-    {"wmclass": "LibreOffice 3.4"},
-    {"wmclass": 'ssh-askpass'},
-    {"wmclass": "Mlconfig"},
+    {'role': 'EventDialog'},
+    {'role': 'Msgcompose'},
+    {'role': 'Preferences'},
+    {'role': 'pop-up'},
+    {'role': 'prefwindow'},
+    {'role': 'task_dialog'},
+    {'wname': 'Module'},
+    {'wname': 'anydesk'},
+    {'wname': 'galculator'},
+    {'wname': 'Insync'},
+    {'wname': 'Picture-in-picture'},
+    {'wname': 'Search Dialog'},
+    {'wname': 'Goto'},
+    {'wname': 'IDLE Preferences'},
+    {'wname': 'Sozi'},
+    {'wname': 'Create new database'},
+    {'wname': 'Preferences'},
+    {'wname': 'File Transfer'},
+    {'wname': 'branchdialog'},
+    {'wname': 'pinentry'},
+    {'wname': 'confirm'},
+    {'wmclass': 'dialog'},
+    {'wmclass': 'blueman-manager'},
+    {'wmclass': 'nm-connection-editor'},
+    {'wmclass': 'download'},
+    {'wmclass': 'error'},
+    {'wmclass': 'file_progress'},
+    {'wmclass': 'notification'},
+    {'wmclass': 'splash'},
+    {'wmclass': 'toolbar'},
+    {'wmclass': 'confirmreset'},
+    {'wmclass': 'makebranch'},
+    {'wmclass': 'maketag'},
+    {'wmclass': 'Dukto'},
+    {'wmclass': 'Tilda'},
+    {'wmclass': 'GoldenDict'},
+    {'wmclass': 'Synapse'},
+    {'wmclass': 'TelegramDesktop'},
+    {'wmclass': 'notify'},
+    {'wmclass': 'Lxappearance'},
+    {'wmclass': 'Oblogout'},
+    {'wmclass': 'Pavucontrol'},
+    {'wmclass': 'Skype'},
+    {'wmclass': 'Eog'},
+    {'wmclass': 'Rhythmbox'},
+    {'wmclass': 'obs'},
+    {'wmclass': 'Gufw.py'},
+    {'wmclass': 'Catfish'},
+    {'wmclass': 'LibreOffice 3.4'},
+    {'wmclass': 'ssh-askpass'},
+    {'wmclass': 'Mlconfig'},
 ], **layout_theme)
 auto_fullscreen = True
 bring_front_click = False
-focus_on_window_activation = "smart"
-floating_types = ["notification", "toolbar", "splash", "dialog",
-                  "utility", "menu", "dropdown_menu", "popup_menu", "tooltip,dock",
+focus_on_window_activation = 'smart'
+floating_types = ['notification', 'toolbar', 'splash', 'dialog',
+                  'utility', 'menu', 'dropdown_menu', 'popup_menu', 'tooltip,dock',
                   ]
-wmname = "LG3D"
+wmname = 'LG3D'
+
