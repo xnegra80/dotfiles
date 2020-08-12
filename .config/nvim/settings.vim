@@ -23,7 +23,6 @@ set smartindent                         " Makes indenting smart
 set autoindent                          " Good auto indent
 set laststatus=0                        " Always display the status line
 set number                              " Line numbers
-set relativenumber
 set smartcase                           " Only care about casing when there is an uppercase letter
 set ignorecase
 set background=dark                     " tell vim what the background color looks like
@@ -37,16 +36,43 @@ set colorcolumn=80                      " Adds vertical line at 80 characters
 set noshowmode                          " Hides the --MODE--"
 set clipboard=unnamedplus               " Copy paste between vim and everything else
 set autochdir
+set lazyredraw
+" set scrolloff=999
 au! BufWritePost $MYVIMRC source %      " auto source when writing to init.vm alternatively you can run :source $MYVIMRC
 autocmd Filetype php setlocal shiftwidth=4
 
 " You can't stop me
 cmap w!! w !sudo tee %
 
-fun! TrimWhitespace()
-    let l:save = winsaveview()
-    keeppatterns %s/\s\+$//e
-    call winrestview(l:save)
-endfun
+autocmd BufWritePre * %s/\s\+$//e
+autocmd InsertEnter * norm zz
 
-autocmd BufWritePre * :call TrimWhitespace()
+autocmd! InsertLeave *.ms,*.md,*.tex call SaveTmp()
+
+function! SaveTmp()
+  let extension = expand('%:e')
+  if extension == "ms"
+          execute "w! /tmp/temp.ms"
+  elseif extension == "tex"
+          execute "w! /tmp/temp.tex"
+  elseif extension == "md"
+          execute "w! /tmp/temp.md"
+  endif
+  call Compile()
+endfunction
+
+function! Compile()
+        let extension = expand('%:e')
+        if extension == "ms"
+                execute "! groff -ms /tmp/temp.ms -T pdf > /tmp/op.pdf"
+        elseif extension == "tex"
+                execute "! pandoc -f latex -t latex /tmp/temp.tex -o /tmp/op.pdf"
+        elseif extension == "md"
+                execute "! pandoc /tmp/temp.md -s -o /tmp/op.pdf"
+        endif
+endfunction
+
+function! Preview()
+        :call Compile()
+        execute "! zathura /tmp/op.pdf &"
+endfunction

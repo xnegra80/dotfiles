@@ -1,4 +1,20 @@
-" TextEdit might fail if hidden is not set.
+
+let g:coc_global_extensions=[
+      \ 'coc-prettier',
+      \ 'coc-tsserver',
+      \ 'coc-css',
+      \ 'coc-json',
+      \ 'coc-eslint',
+      \ 'coc-python',
+      \ 'coc-phpls',
+      \ 'coc-markdownlint',
+      \ 'coc-styled-components',
+      \ 'coc-vimlsp'
+      \ ]
+
+
+
+"TextEdit might fail if hidden is not set.
 set hidden
 
 " Some servers have issues with backup files, see #649.

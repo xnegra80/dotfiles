@@ -1,8 +1,6 @@
-from libqtile import widget, bar, hook, pangocffi
-from subprocess import CalledProcessError, Popen, PIPE
-import os
-import iwlib
-# pylint: disable=maybe-no-member
+from libqtile import widget
+import helpers
+import requests
 
 
 class Volume(widget.Volume):
@@ -14,19 +12,20 @@ class Volume(widget.Volume):
 
     def _update_drawer(self):
         if self.volume == -1:
-            self.text = '     '
+            self.text = ''
         elif self.volume == 0:
-            self.text = '    {}%'.format(self.volume)
+            self.text = ' {}%'.format(self.volume)
         elif self.volume < 10:
-            self.text = '    {}%'.format(self.volume)
+            self.text = ' {}%'.format(self.volume)
         elif self.volume <= 30:
-            self.text = '   {}%'.format(self.volume)
+            self.text = ' {}%'.format(self.volume)
         elif self.volume < 80:
-            self.text = '   {}%'.format(self.volume)
+            self.text = ' {}%'.format(self.volume)
         elif self.volume < 100:
-            self.text = '   {}%'.format(self.volume)
+            self.text = ' {}%'.format(self.volume)
         else:
             self.text = ' {}%'.format(self.volume)
+        self.text = self.text.center(8)
 
 
 class ThermalSensor(widget.ThermalSensor):
@@ -35,30 +34,22 @@ class ThermalSensor(widget.ThermalSensor):
         if temp_values is None:
             return False
         text = ""
-        if self.show_tag and self.tag_sensor is not None:
-            text = self.tag_sensor + ": "
         text += "".join(temp_values.get(self.tag_sensor, ['N/A']))
         temp_value = float(temp_values.get(self.tag_sensor, [0])[0])
         if temp_value > self.threshold:
             self.layout.colour = self.foreground_alert
         else:
             self.layout.colour = self.foreground_normal
-        return ' ' + text
-
-
-def get_status(interface_name):
-    interface = iwlib.get_iwconfig(interface_name)
-    if 'stats' not in interface:
-        return None, None
-    quality = interface['stats']['quality']
-    essid = bytes(interface['ESSID']).decode()
-    return essid, quality
+        text = ' ' + text.replace('.0', '')
+        return text.center(8)
 
 
 class Wlan(widget.Wlan):
     def poll(self):
         try:
-            essid, quality = get_status(self.interface)
+            vpn = helpers.bash_command(
+                "nmcli con show --active | grep -i vpn | awk '{print $4}'")
+            essid, quality = helpers.get_interface_status(self.interface)
             disconnected = essid is None
             if disconnected:
                 return ''
@@ -68,18 +59,59 @@ class Wlan(widget.Wlan):
                 icon = ''
             else:
                 icon = ''
+            if vpn:
+                self.format += '  {vpn}'
             return self.format.format(
                 essid=essid,
-                icon=icon
+                icon=icon,
+                vpn=vpn
             )
         except EnvironmentError:
             return
 
 
-def call_script(path):
-    return Popen(
-        os.path.expanduser(path),
-        shell=True,
-        stdout=PIPE,
-        universal_newlines=True
-    ).communicate()[0].strip()
+class Net(widget.Net):
+    def _format(self, down, down_letter, up, up_letter):
+        down = str(int(down))
+        up = str(int(up))
+        return down, up
+
+    def poll(self):
+        try:
+            for intf in self.interface:
+                new_stats = self.get_stats()
+                down = new_stats[intf]['down'] - \
+                    self.stats[intf]['down']
+                up = new_stats[intf]['up'] - \
+                    self.stats[intf]['up']
+
+                down = down / self.update_interval
+                up = up / self.update_interval
+                down, down_letter = self.convert_b(down)
+                up, up_letter = self.convert_b(up)
+                down, up = self._format(down, down_letter, up, up_letter)
+                self.stats[intf] = new_stats[intf]
+                down = down + down_letter
+                up = up + up_letter
+
+            return down.rjust(5) + '  ' + up.ljust(5)
+
+        except Exception:
+            return
+
+
+def get_bluetooth():
+    result = helpers.bash_script('~/.config/qtile/bluetooth.sh')
+    if result == 'No devices':
+        return ''
+    elif not result:
+        return ''
+    else:
+        return ' ' + result
+
+
+def get_bitcoin():
+    TICKER_API_URL = 'https://blockchain.info/tobtc?currency=GBP&value=1'
+    response = requests.get(TICKER_API_URL)
+    price = 1 / float(response.text)
+    return '  £'+'{:.2f}'.format(price)

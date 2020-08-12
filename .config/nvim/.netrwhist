@@ -1,5 +1,12 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhistcnt =3
-let g:netrw_dirhist_3='/home/gordon/dev/spaceship/spaceship-business-panel'
-let g:netrw_dirhist_2='/home/gordon/dev/spaceship/spaceship-business-panel/config'
-let g:netrw_dirhist_1='/home/gordon/dev/spaceship/spaceship-business-panel'
+let g:netrw_dirhistcnt =4
+let g:netrw_dirhist_4='/home/gordon/dev/spaceship/spaceship-business-panel'
+let g:netrw_dirhist_3='/'
+let g:netrw_dirhist_2='/home/gordon'
+let g:netrw_dirhist_1='/home/gordon/dev/spaceship'
+let g:netrw_dirhist_0='/home/gordon/dev/spaceship/spaceship-business-panel/nova-components'
+let g:netrw_dirhist_9='/home/gordon/dev/spaceship/spaceship-business-panel'
+let g:netrw_dirhist_8='/home/gordon/dev/spaceship/spaceship-business-panel/nova-components'
+let g:netrw_dirhist_7='/home/gordon/dev/spaceship/spaceship-business-panel'
+let g:netrw_dirhist_6='/home/gordon/dev/spaceship/spaceship-business-panel/storage/logs'
+let g:netrw_dirhist_5='/home/gordon/gnome-network-displays'

@@ -13,7 +13,7 @@ let g:startify_bookmarks = [
             \ { 'sa': '~/dev/spaceship/spaceship-api-dev' },
             \ { 'i': '~/.config/nvim/init.vim' },
             \ { 'f': '~/.config/fish/config.fish' },
-            \ { 'q': '~/.config/qtile/config.py' },
+            \ { 'c': '~/.config/qtile/config.py' },
             \ ]
 
 let g:startify_session_autoload = 1

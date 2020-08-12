@@ -9,7 +9,7 @@ power_on() {
 }
 
 if power_on; then
-  devices=$(bluetoothctl info | grep Name: | sed 1q | awk '{$1 = ""; print $0}'| paste -sd "," -)
+  devices=$(bluetoothctl info | grep Name: | awk '{$1 = ""; print $0}'| paste -sd "," -)
   echo "${devices}"
 else
   echo "No devices"

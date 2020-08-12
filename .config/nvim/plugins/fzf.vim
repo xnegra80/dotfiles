@@ -10,8 +10,6 @@ let g:fzf_action = {
 " explicitly bind the keys to down and up in your $FZF_DEFAULT_OPTS.
 let g:fzf_history_dir = '~/.local/share/fzf-history'
 
-map <leader>b :Buffers<CR>
-
 " Border color
 let g:fzf_layout = {'up':'~90%', 'window': { 'width': 0.8, 'height': 0.8,'yoffset':0.5,'xoffset': 0.5 } }
 
@@ -62,3 +60,14 @@ command! -bang -nargs=* GGrep
   \ call fzf#vim#grep(
   \   'git grep --line-number '.shellescape(<q-args>), 0,
   \   fzf#vim#with_preview({'dir': systemlist('git rev-parse --show-toplevel')[0]}), <bang>0)
+
+function! s:changebranch(branch)
+    execute 'Git checkout ' . a:branch
+    call feedkeys("i")
+endfunction
+
+command! -bang Gcheckout call fzf#run({
+            \ 'source': 'git branch -r --no-color | grep -v "^\* " | sed "s/origin\///g"',
+            \ 'sink': function('s:changebranch'),
+            \ 'down': '40%','up':'~90%', 'window': { 'width': 0.8, 'height': 0.8,'yoffset':0.5,'xoffset': 0.5 }
+            \ })

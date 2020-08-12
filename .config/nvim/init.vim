@@ -1,5 +1,4 @@
 source $HOME/.config/nvim/settings.vim
-source $HOME/.config/nvim/mappings.vim
 source $HOME/.config/nvim/plugins.vim
 source $HOME/.config/nvim/dracula.vim
 source $HOME/.config/nvim/plugins/coc.vim
@@ -10,4 +9,5 @@ source $HOME/.config/nvim/plugins/signify.vim
 source $HOME/.config/nvim/plugins/fzf.vim
 source $HOME/.config/nvim/plugins/whichkey.vim
 source $HOME/.config/nvim/plugins/nerdtree.vim
+source $HOME/.config/nvim/mappings.vim
 luafile $HOME/.config/nvim/lua/plug-colorizer.lua
