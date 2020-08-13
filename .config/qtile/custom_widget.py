@@ -1,11 +1,15 @@
-from libqtile import widget
+from libqtile.widget.volume import Volume
+from libqtile.widget.sensors import ThermalSensor
+from libqtile.widget.wlan import Wlan
+from libqtile.widget.net import Net
+from libqtile.widget import base
 import helpers
 import requests
 
 
-class Volume(widget.Volume):
+class Volume(Volume):
     def __init__(self, **config):
-        widget.base._TextBox.__init__(self, '0', **config)
+        base._TextBox.__init__(self, '0', **config)
         self.add_defaults(Volume.defaults)
         self.surfaces = {}
         self.volume = None
@@ -28,7 +32,7 @@ class Volume(widget.Volume):
         self.text = self.text.center(8)
 
 
-class ThermalSensor(widget.ThermalSensor):
+class ThermalSensor(ThermalSensor):
     def poll(self):
         temp_values = self.get_temp_sensors()
         if temp_values is None:
@@ -44,7 +48,7 @@ class ThermalSensor(widget.ThermalSensor):
         return text.center(8)
 
 
-class Wlan(widget.Wlan):
+class Wlan(Wlan):
     def poll(self):
         try:
             vpn = helpers.bash_command(
@@ -70,7 +74,7 @@ class Wlan(widget.Wlan):
             return
 
 
-class Net(widget.Net):
+class Net(Net):
     def _format(self, down, down_letter, up, up_letter):
         down = str(int(down))
         up = str(int(up))
@@ -111,7 +115,7 @@ def get_bluetooth():
 
 
 def get_bitcoin():
-    TICKER_API_URL = 'https://blockchain.info/tobtc?currency=GBP&value=1'
-    response = requests.get(TICKER_API_URL)
-    price = 1 / float(response.text)
-    return '  £'+'{:.2f}'.format(price)
+    GBP_API_URL = 'https://blockchain.info/tobtc?currency=GBP&value=1'
+    gbp = requests.get(GBP_API_URL)
+    gbp = str(int(1 / float(gbp.text)))
+    return '  £' + gbp

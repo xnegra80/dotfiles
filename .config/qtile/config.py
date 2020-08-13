@@ -2,11 +2,11 @@ from libqtile.config import Key, Screen, Group, Drag, Click, Match
 from libqtile.lazy import lazy
 from libqtile import layout, bar, widget, hook, extension
 
-from Xlib import display
 import helpers
 import custom_widget
 import os
 import subprocess
+from screeninfo import get_monitors
 
 mod = 'mod4'
 
@@ -106,10 +106,10 @@ keys = [
         'n',
         lazy.layout.normalize(),
     ),
-    # Key(
-    #     [mod], 'm',
-    #     lazy.layout.maximize(),
-    # ),
+    Key(
+        [mod], 'm',
+        lazy.layout.maximize(),
+    ),
     Key(
         [mod, 'shift'],
         'f',
@@ -169,8 +169,8 @@ keys = [
         lazy.group['5'].toscreen(toggle=False)),
     Key([mod], 't', lazy.group['7'].toscreen(toggle=False),
         lazy.spawn('tableplus')),
-    Key([mod], 'p', lazy.group['7'].toscreen(toggle=False),
-        lazy.spawn('postman')),
+    # Key([mod], 'p', lazy.group['7'].toscreen(toggle=False),
+    #     lazy.spawn('postman')),
 ]
 
 groups = [
@@ -307,8 +307,7 @@ def get_widgets():
 screens = [
     Screen(top=bar.Bar(
         get_widgets(), 24, background=get_color('background'), opacity=.9))
-    for _ in range(-1,
-                   display.Display().screen_count())
+    for _ in range(2)
 ]
 
 # Drag floating layouts.
