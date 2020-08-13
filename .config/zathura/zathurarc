@@ -1,0 +1,6 @@
+set recolor-lightcolor \#282a36
+set recolor-darkcolor \#f8f8f2
+set recolor
+set adjust-open width
+set guioptions none
+set recolor-keephue "true"
