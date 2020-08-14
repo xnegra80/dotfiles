@@ -64,7 +64,7 @@ class Wlan(Wlan):
             else:
                 icon = ''
             if vpn:
-                self.format += '  {vpn}'
+                self.format += ' {vpn} '
             return self.format.format(
                 essid=essid,
                 icon=icon,
@@ -107,15 +107,21 @@ class Net(Net):
 def get_bluetooth():
     result = helpers.bash_script('~/.config/qtile/bluetooth.sh')
     if result == 'No devices':
-        return ''
+        return '  '
     elif not result:
-        return ''
+        return '  '
     else:
-        return ' ' + result
+        return '  ' + result + ' '
 
 
 def get_bitcoin():
     GBP_API_URL = 'https://blockchain.info/tobtc?currency=GBP&value=1'
     gbp = requests.get(GBP_API_URL)
     gbp = str(int(1 / float(gbp.text)))
-    return '  £' + gbp
+    return '  £' + gbp + ' '
+
+
+def get_im():
+    im = helpers.bash_command(
+        'if [ $(fcitx5-remote) == "1" ]; then echo EN; else echo ZH; fi')
+    return '  '+im+' '

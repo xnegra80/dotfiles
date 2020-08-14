@@ -85,6 +85,7 @@ keys = [
                 ' Lock': 'xset dpms force suspend; slock',
                 ' Shutdown': 'systemctl poweroff',
                 ' Reboot': 'systemctl reboot',
+                ' Logout': 'sudo systemctl restart lightdm.service',
                 ' Hibernate': 'systemctl hibernate',
                 ' Suspend': 'systemctl suspend',
             },
@@ -254,7 +255,9 @@ def get_widgets():
             padding=3,
         ),
         widget.WindowName(),
-        widget.Systray(padding=3),
+        # widget.Systray(padding=3),
+
+
         widget.GenPollText(func=custom_widget.get_bluetooth,
                            foreground=get_color('cyan'),
                            update_interval=1),
@@ -264,9 +267,17 @@ def get_widgets():
                           interface=helpers.get_interface()),
         custom_widget.Wlan(foreground=get_color('green'),
                            interface=helpers.get_interface(),
-                           format='{icon} {essid}'),
-        widget.CPUGraph(**get_graph_theme('yellow')),
-        widget.MemoryGraph(**get_graph_theme('orange')),
+                           format=' {icon} {essid} '),
+
+        widget.GenPollText(func=custom_widget.get_im,
+                           foreground=get_color('orange'),
+                           background=get_color('grey'),
+                           update_interval=1),
+        widget.GenPollText(func=custom_widget.get_bitcoin,
+                           foreground=get_color('yellow'),
+                           update_interval=1),
+        widget.CPUGraph(**get_graph_theme('green')),
+        widget.MemoryGraph(**get_graph_theme('cyan')),
         widget.SwapGraph(**get_graph_theme('primary')),
         custom_widget.ThermalSensor(foreground=get_color('cyan'),
                                     threshold=60),
@@ -296,11 +307,8 @@ def get_widgets():
             colour_no_updates=get_color('primary'),
             background=get_color('grey'),
             display_format='  {updates:>2} '),
-        widget.GenPollText(func=custom_widget.get_bitcoin,
-                           foreground=get_color('yellow'),
-                           update_interval=1),
 
-        widget.CurrentLayoutIcon(scale=.45),
+
     ]
 
 

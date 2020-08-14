@@ -8,5 +8,5 @@ geary --gapplication-service&
 fusuma -d&
 spotifyd&
 discord --start-minimized&
-insync-headless start&
+fcitx5&
 /usr/lib/mate-polkit/polkit-mate-authentication-agent-1&

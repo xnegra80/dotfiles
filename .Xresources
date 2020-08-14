@@ -18,8 +18,7 @@
 *.color7:     #BFBFBF
 *.color15:    #E6E6E6
 
-Xft.dpi: 144
-Xcursor.size: 16
+Xft.dpi: 96
 
 rofi.kb-row-up:                      Up,Control+k,Shift+Tab,Shift+ISO_Left_Tab
 rofi.kb-row-down:                    Down,Control+j

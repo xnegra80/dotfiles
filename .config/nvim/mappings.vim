@@ -29,7 +29,7 @@ inoremap <c-q> <esc>:bp\|bd! #<cr>
 nnoremap <c-p> :GFiles --cached --others<cr>
 
 " ctrl + f to search text
-nnoremap <c-f> :Rg<cr>
+nnoremap <c-f> :RG<cr>
 
 " ctrl + e to open file tree
 nnoremap <c-e> :NERDTreeFind %<cr>
@@ -126,7 +126,9 @@ nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list.
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>s
 
-
+" CamelCaseMotion
+nnoremap W :call search('\<\<Bar>\u', 'W')<CR>
+nnoremap B :call search('\<\<Bar>\u', 'bW')<CR>
 
 
 
