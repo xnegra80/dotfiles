@@ -123,5 +123,5 @@ def get_bitcoin():
 
 def get_im():
     im = helpers.bash_command(
-        'if [ $(fcitx5-remote) == "1" ]; then echo EN; else echo ZH; fi')
+        'if [ $(fcitx5-remote) == "2" ]; then echo ZH; else echo EN; fi')
     return '  '+im+' '

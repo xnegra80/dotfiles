@@ -5,6 +5,7 @@ dunst&
 redshift&
 ferdi&
 geary --gapplication-service&
+geary&
 fusuma -d&
 spotifyd&
 discord --start-minimized&

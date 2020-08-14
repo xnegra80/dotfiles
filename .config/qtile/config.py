@@ -31,28 +31,13 @@ def autostart():
     subprocess.Popen(os.path.expanduser('~/.config/qtile/autostart.sh'))
 
 
+term = 'alacritty'
+
 keys = [
 
-    # Switch between windows in current stack pane
-    Key([mod], 'k', lazy.layout.up()),
-    Key([mod], 'j', lazy.layout.down()),
-    Key([mod], 'h', lazy.layout.left()),
-    Key([mod], 'l', lazy.layout.right()),
-
-    # Move windows up or down in current stack
-    Key([mod, 'shift'], 'k', lazy.layout.shuffle_up()),
-    Key([mod, 'shift'], 'j', lazy.layout.shuffle_down()),
-    Key([mod, 'shift'], 'h', lazy.layout.shuffle_left()),
-    Key([mod, 'shift'], 'l', lazy.layout.shuffle_right()),
-
-    # Grow windows up or down in current stack
-    Key([mod, 'control'], 'k', lazy.layout.grow_up()),
-    Key([mod, 'control'], 'j', lazy.layout.grow_down()),
-    Key([mod, 'control'], 'h', lazy.layout.grow_left()),
-    Key([mod, 'control'], 'l', lazy.layout.grow_right()),
-    Key([mod], 'space', lazy.layout.next()),
-
     # rofi menus
+    Key([mod], 'd', lazy.spawn('rofi -show drun')),
+    Key([mod, 'shift'], 'd', lazy.spawn('rofi -show run')),
     Key([mod, 'control'], 'v', lazy.group['0'].toscreen(toggle=False),
         lazy.run_extension(
             extension.CommandSet(commands={
@@ -84,12 +69,43 @@ keys = [
             extension.CommandSet(commands={
                 ' Lock': 'xset dpms force suspend; slock',
                 ' Shutdown': 'systemctl poweroff',
-                ' Reboot': 'systemctl reboot',
-                ' Logout': 'sudo systemctl restart lightdm.service',
+                ' Reboot': 'killall lightdm',
+                ' Logout': 'systemctl restart lightdm.service',
                 ' Hibernate': 'systemctl hibernate',
                 ' Suspend': 'systemctl suspend',
             },
                 dmenu_prompt='Power'))),
+
+    # -----------------------------------*----------------------------------- #
+    # --------------------------Window Manipulation-------------------------- #
+    # -----------------------------------*----------------------------------- #
+
+    # Layout
+    Key([mod], 'Tab', lazy.next_layout()),
+    Key([mod, 'shift'], 'Tab', lazy.prev_layout()),
+
+    Key([mod, 'shift'], 'q', lazy.window.kill()),
+
+    # Switch between windows in current stack pane
+    Key([mod], 'k', lazy.layout.up()),
+    Key([mod], 'j', lazy.layout.down()),
+    Key([mod], 'h', lazy.layout.left()),
+    Key([mod], 'l', lazy.layout.right()),
+
+    # Move windows up or down in current stack
+    Key([mod, 'shift'], 'k', lazy.layout.shuffle_up()),
+    Key([mod, 'shift'], 'j', lazy.layout.shuffle_down()),
+    Key([mod, 'shift'], 'h', lazy.layout.shuffle_left()),
+    Key([mod, 'shift'], 'l', lazy.layout.shuffle_right()),
+
+    # Grow windows up or down in current stack
+    Key([mod, 'control'], 'k', lazy.layout.grow_up()),
+    Key([mod, 'control'], 'j', lazy.layout.grow_down()),
+    Key([mod, 'control'], 'h', lazy.layout.grow_left()),
+    Key([mod, 'control'], 'l', lazy.layout.grow_right()),
+    Key([mod], 'space', lazy.layout.next()),
+
+    # Window sizes
     Key(
         [mod],
         'h',
@@ -140,49 +156,64 @@ keys = [
     ),
     Key([mod], 'space', lazy.layout.next()),
 
-    # XF86 Buttons
+    # -----------------------------------*----------------------------------- #
+    # ------------------------------XF86 Buttons----------------------------- #
+    # -----------------------------------*----------------------------------- #
+
     Key([], 'XF86MonBrightnessUp', lazy.spawn('brightnessctl set +5%')),
     Key([], 'XF86MonBrightnessDown', lazy.spawn('brightnessctl set 5%-')),
     Key([], 'XF86AudioRaiseVolume', lazy.widget['volume'].increase_vol()),
     Key([], 'XF86AudioLowerVolume', lazy.widget['volume'].decrease_vol()),
     Key([], 'XF86AudioMute', lazy.widget['volume'].mute()),
-    Key([mod, 'shift'], 'Return', lazy.layout.toggle_split()),
-    Key([mod], 'Tab', lazy.next_layout()),
-    Key([mod, 'shift'], 'Tab', lazy.prev_layout()),
-    Key([mod, 'shift'], 'q', lazy.window.kill()),
+
     Key([mod, 'shift'], 'r', lazy.restart()),
-    Key([mod], 'd', lazy.spawn('rofi -show drun')),
-    Key([mod, 'shift'], 'd', lazy.spawn('rofi -show run')),
-    Key([mod], 'Return', lazy.spawn('alacritty')),
+
+    # -----------------------------------*----------------------------------- #
+    # ---------------------------Launch Applications------------------------- #
+    # -----------------------------------*----------------------------------- #
+
+    # GUI applications
+    Key([mod], 'b', lazy.spawn('timeshift-launcher')),
     Key([mod], 'e', lazy.spawn('caja')),
-    Key([mod, 'shift'], 'e', lazy.spawn('sudo caja')),
-    Key([mod], 'l', lazy.spawn('alacritty -e ranger')),
-    Key([mod], 'i', lazy.spawn('killall insync'), lazy.spawn('insync start')),
+    Key([mod], 'm', lazy.spawn('geary')),
+    Key([mod], 'p', lazy.spawn('postman')),
+    Key([mod], 't', lazy.spawn('tableplus')),
     Key([mod], 'v', lazy.spawn('pavucontrol')),
-    Key([mod, 'shift'], 't', lazy.spawn('sudo timeshift')),
-    Key([mod], 'm', lazy.group['1'].toscreen(toggle=False),
-        lazy.spawn('mailspring')),
-    Key([mod], 'w', lazy.group['2'].toscreen(toggle=False),
-        lazy.spawn('vivaldi-stable')),
-    Key([mod], 'c', lazy.group['4'].toscreen(toggle=False),
-        lazy.spawn('code')),
-    Key([mod], 's', lazy.spawn('alacritty --title spt -e spt'),
-        lazy.group['5'].toscreen(toggle=False)),
-    Key([mod], 't', lazy.group['7'].toscreen(toggle=False),
-        lazy.spawn('tableplus')),
-    # Key([mod], 'p', lazy.group['7'].toscreen(toggle=False),
-    #     lazy.spawn('postman')),
+    Key([mod], 'w', lazy.spawn('vivaldi-stable')),
+
+    # CLI applications
+    Key([mod], 'Return', lazy.spawn(term)),
+    Key([mod], 'l', lazy.spawn(f'{term} -e ranger')),
+    Key([mod], 'c', lazy.spawn(f'{term} --class nvim -e nvr')),  # fix resize
+    Key([mod], 's', lazy.spawn(f'{term} --class spotify -e spt')),
 ]
 
+
+@hook.subscribe.client_new
+def window_match(window):
+    matches = {
+        'vivaldi-stable': 2,
+        'nvim': 4,
+        'spotify': 5,
+        'geary': 6,
+        'TablePlus': 7
+    }
+
+    if (window.name == 'Football Manager 2020'):
+        window.fullscreen = False
+
+    for wmclass, group in matches.items():
+        if window.match(wmclass=wmclass):
+            window.togroup(str(group), switch_group=True)
+            break
+
+
 groups = [
-    Group('1',
-          label='',
-          layout='monadtall',
-          matches=[Match(wm_class=['ferdi'])]),
+    Group('1', label='', layout='monadtall'),
     Group('2', label='', layout='monadtall'),
     Group('3', label='', layout='ratiotile'),
     Group('4', label='', layout='max'),
-    Group('5', label='', layout='monadtall', matches=[Match(['spt'])]),
+    Group('5', label='', layout='monadtall'),
     Group('6', label='', layout='monadtall'),
     Group('7', label='', layout='max'),
     Group('8', label='', layout='max'),
@@ -191,10 +222,11 @@ groups = [
 ]
 
 for i in range(10):
+    name = str(i)
     keys.extend([
-        Key([mod], str(i), lazy.group[str(i)].toscreen()),
-        Key([mod, 'shift'], str(i),
-            lazy.window.togroup(str(i), switch_group=True)),
+        Key([mod], name, lazy.group[name].toscreen()),
+        Key([mod, 'shift'], name,
+            lazy.window.togroup(name, switch_group=True)),
     ])
 
 layout_theme = dict(border_width=0,
@@ -256,7 +288,11 @@ def get_widgets():
         ),
         widget.WindowName(),
         # widget.Systray(padding=3),
-
+        widget.CheckUpdates(
+            custom_command='checkupdates && pikaur -Qua 2>/dev/null',
+            colour_have_updates=get_color('pink'),
+            background=get_color('grey'),
+            display_format='  {updates:>2} '),
 
         widget.GenPollText(func=custom_widget.get_bluetooth,
                            foreground=get_color('cyan'),
@@ -272,7 +308,7 @@ def get_widgets():
         widget.GenPollText(func=custom_widget.get_im,
                            foreground=get_color('orange'),
                            background=get_color('grey'),
-                           update_interval=1),
+                           update_interval=.2),
         widget.GenPollText(func=custom_widget.get_bitcoin,
                            foreground=get_color('yellow'),
                            update_interval=1),
@@ -300,14 +336,7 @@ def get_widgets():
             background=get_color('grey'),
             step=5),
         widget.Clock(foreground=get_color('orange'),
-                     format='%m/%d %a %I:%M %P'),
-        widget.CheckUpdates(
-            custom_command='checkupdates && pikaur -Qua 2>/dev/null',
-            colour_have_updates=get_color('pink'),
-            colour_no_updates=get_color('primary'),
-            background=get_color('grey'),
-            display_format='  {updates:>2} '),
-
+                     format=' %b %d %a %I:%M %P '),
 
     ]
 
@@ -316,6 +345,8 @@ screens = [
     Screen(top=bar.Bar(
         get_widgets(), 24, background=get_color('background'), opacity=.9))
     for _ in range(2)
+
+
 ]
 
 # Drag floating layouts.

@@ -37,7 +37,8 @@ set noshowmode                          " Hides the --MODE--"
 set clipboard=unnamedplus               " Copy paste between vim and everything else
 set autochdir
 set lazyredraw
-" set scrolloff=999
+set diffopt+=vertical                   " Git diff tool
+set scrolloff=999
 au! BufWritePost $MYVIMRC source %      " auto source when writing to init.vm alternatively you can run :source $MYVIMRC
 autocmd Filetype php setlocal shiftwidth=4
 
