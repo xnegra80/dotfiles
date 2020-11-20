@@ -34,12 +34,41 @@
 (setq org-directory "~/x/notes/")
 (require 'org-superstar)
 (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
-
+(defun org-checkbox-todo ()
+  "Switch header TODO state to DONE when all checkboxes are ticked, to TODO otherwise"
+  (let ((todo-state (org-get-todo-state)) beg end)
+    (unless (not todo-state)
+      (save-excursion
+    (org-back-to-heading t)
+    (setq beg (point))
+    (end-of-line)
+    (setq end (point))
+    (goto-char beg)
+    (if (re-search-forward "\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"
+                   end t)
+        (if (match-end 1)
+        (if (equal (match-string 1) "100%")
+            (unless (string-equal todo-state "DONE")
+              (org-todo 'done))
+          (unless (string-equal todo-state "TODO")
+            (org-todo 'todo)))
+          (if (and (> (match-end 2) (match-beginning 2))
+               (equal (match-string 2) (match-string 3)))
+          (unless (string-equal todo-state "DONE")
+            (org-todo 'done))
+        (unless (string-equal todo-state "TODO")
+          (org-todo 'todo)))))))))
+(add-hook 'org-checkbox-statistics-hook 'org-checkbox-todo)
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type 'relative)
-
-
+(setq display-line-numbers-type t)
+(setq scroll-step 1)
+(setq scroll-margin 1)
+(setq scroll-conservatively 9999)
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+  (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+  (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+  (setq scroll-step 1)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -49,9 +78,18 @@
 ;;   this file. Emacs searches the `load-path' when you load packages with
 ;;   `require' or `use-package'.
 ;; - `map!' for binding new keys
-;;
-;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
+(defun comment-or-uncomment-line-or-region ()
+  "Toggles commenting on the current line if no region is defined,
+   otherwise toggles comments on the region"
+  (interactive "*")
+  (let ((use-empty-active-region t) (mark-even-if-inactive nil))
+    (cond
+     ((use-region-p) (comment-or-uncomment-region (region-beginning) (region-end)))
+     (t (comment-or-uncomment-region (line-beginning-position) (line-end-position))))));
+(map! "C-/" #'comment-or-uncomment-line-or-region )
+
+;; to get information about any of these functions/macros, move the cursor over
+;; the highlighted symbol at press 'k' (non-evil users must press 'c-c c k').
 ;; This will open documentation for it, including demos of how they are used.
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
