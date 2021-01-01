@@ -62,8 +62,8 @@ command! -bang -nargs=* GGrep
   \   fzf#vim#with_preview({'dir': systemlist('git rev-parse --show-toplevel')[0]}), <bang>0)
 
 function! s:changebranch(branch)
-    execute 'Git checkout ' . a:branch
-    call feedkeys("i")
+    execute 'Git checkout ' . a:branch . ' | Gfetch'
+    " call feedkeys("i")
 endfunction
 
 command! -bang Gcheckout call fzf#run({

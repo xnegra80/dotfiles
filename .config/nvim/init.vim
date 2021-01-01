@@ -4,6 +4,7 @@ source $HOME/.config/nvim/dracula.vim
 source $HOME/.config/nvim/plugins/coc.vim
 source $HOME/.config/nvim/plugins/airline.vim
 source $HOME/.config/nvim/plugins/startscreen.vim
+source $HOME/.config/nvim/plugins/vimwiki.vim
 source $HOME/.config/nvim/plugins/quickscope.vim
 source $HOME/.config/nvim/plugins/signify.vim
 source $HOME/.config/nvim/plugins/fzf.vim

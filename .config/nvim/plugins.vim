@@ -32,5 +32,6 @@ call plug#begin('~/.config/nvim/autoload/plugged')
     "
     Plug 'liuchengxu/vim-which-key'
     Plug 'jiangmiao/auto-pairs'
+    Plug 'vimwiki/vimwiki'
 
 call plug#end()

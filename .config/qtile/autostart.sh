@@ -1,13 +1,19 @@
 #! /bin/bash
-picom -b&
+
+picom --experimental-backends --backend glx&
 feh --bg-fill ~/Pictures/wallpaper.png&
 dunst&
-redshift&
 ferdi&
-geary --gapplication-service&
-geary&
+evolution&
 fusuma -d&
-spotifyd&
 discord --start-minimized&
 fcitx5&
+~/.config/scripts/wait.sh
 /usr/lib/mate-polkit/polkit-mate-authentication-agent-1&
+sudo tzupdate&
+redshift -l geoclue2&
+spotifyd&
+emacs --daemon&
+echo "enabled" > ~/.keyboard&
+insync start&
+discord --start-minimized&

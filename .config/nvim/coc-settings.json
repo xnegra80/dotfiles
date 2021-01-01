@@ -1,7 +1,8 @@
 {
   "coc.preferences.formatOnSaveFiletypes": ["*"],
-  "python.linting.flake8Args": ["--ignore", "E501", "W391"],
-  "python.linting.flake8Enabled": true,
   "python.linting.pylintEnabled": false,
-  "python.jediEnabled": true
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": ["--ignore", "E501", "W391"],
+  "python.jediEnabled": true,
+  "coc.preferences.extensionUpdateCheck": "daily"
 }

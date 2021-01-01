@@ -25,7 +25,9 @@ autocmd! FileType which_key
 autocmd  FileType which_key set laststatus=0 noshowmode noruler
   \| autocmd BufLeave <buffer> set laststatus=2 noshowmode ruler
 
+let g:which_key_map['a'] = [ '<Plug>(coc-codeaction-selected)', 'spell check']
 let g:which_key_map['b'] = [ ':Buffer', 'buffers']
+" let g:which_key_map['w'] = [ ':call Wipeout()', 'close unopened buffers']
 let g:which_key_map['o'] = [ ':Startify', 'start screen' ]
 let g:which_key_map['h'] = [ '<C-W>s', 'split below']
 let g:which_key_map['v'] = [ '<C-W>v', 'split right']
@@ -37,6 +39,8 @@ let g:which_key_map.g['k'] = ['<plug>(signify-prev-hunk)', 'previous change']
 let g:which_key_map.g['s'] = [':G', 'status']
 let g:which_key_map.g['b'] = [':Gblame', 'blame']
 let g:which_key_map.g['c'] = [':Gcheckout', 'checkout']
+let g:which_key_map.g['p'] = [':Gpull', 'pull']
+let g:which_key_map.g['m'] = [':Gcommit', 'commit']
 let g:which_key_map.g['-'] = [':Git stash -u', 'stash']
 let g:which_key_map.g['+'] = [':Git stash pop', 'pop stash']
 " Git resolve conflict

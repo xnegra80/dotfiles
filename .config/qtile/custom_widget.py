@@ -5,30 +5,32 @@ from libqtile.widget.net import Net
 from libqtile.widget import base
 import helpers
 import requests
+import re
+import xmltodict
 
 
 class Volume(Volume):
     def __init__(self, **config):
-        base._TextBox.__init__(self, '0', **config)
+        base._TextBox.__init__(self, "0", **config)
         self.add_defaults(Volume.defaults)
         self.surfaces = {}
         self.volume = None
 
     def _update_drawer(self):
         if self.volume == -1:
-            self.text = ''
+            self.text = ""
         elif self.volume == 0:
-            self.text = ' {}%'.format(self.volume)
+            self.text = " {}%".format(self.volume)
         elif self.volume < 10:
-            self.text = ' {}%'.format(self.volume)
+            self.text = " {}%".format(self.volume)
         elif self.volume <= 30:
-            self.text = ' {}%'.format(self.volume)
+            self.text = " {}%".format(self.volume)
         elif self.volume < 80:
-            self.text = ' {}%'.format(self.volume)
+            self.text = " {}%".format(self.volume)
         elif self.volume < 100:
-            self.text = ' {}%'.format(self.volume)
+            self.text = " {}%".format(self.volume)
         else:
-            self.text = ' {}%'.format(self.volume)
+            self.text = " {}%".format(self.volume)
         self.text = self.text.center(8)
 
 
@@ -38,13 +40,13 @@ class ThermalSensor(ThermalSensor):
         if temp_values is None:
             return False
         text = ""
-        text += "".join(temp_values.get(self.tag_sensor, ['N/A']))
+        text += "".join(temp_values.get(self.tag_sensor, ["N/A"]))
         temp_value = float(temp_values.get(self.tag_sensor, [0])[0])
         if temp_value > self.threshold:
             self.layout.colour = self.foreground_alert
         else:
             self.layout.colour = self.foreground_normal
-        text = ' ' + text.replace('.0', '')
+        text = " " + re.sub(r"\.\d", "", text)
         return text.center(8)
 
 
@@ -52,24 +54,26 @@ class Wlan(Wlan):
     def poll(self):
         try:
             vpn = helpers.bash_command(
-                "nmcli con show --active | grep -i vpn | awk '{print $4}'")
+                "nmcli con show --active | grep -i vpn | awk '{print $3}'"
+            )
+            if helpers.bash_command(
+                "nmcli device status | grep ethernet | grep connected"
+            ):
+                return self.format.format(essid="", icon=" ", vpn=vpn)
             essid, quality = helpers.get_interface_status(self.interface)
             disconnected = essid is None
+
             if disconnected:
-                return ''
+                return ""
             if quality < 20:
-                icon = ''
+                icon = ""
             elif quality < 60:
-                icon = ''
+                icon = ""
             else:
-                icon = ''
+                icon = ""
             if vpn:
-                self.format += ' {vpn} '
-            return self.format.format(
-                essid=essid,
-                icon=icon,
-                vpn=vpn
-            )
+                vpn = " " + vpn
+            return self.format.format(essid=essid, icon=icon, vpn=vpn)
         except EnvironmentError:
             return
 
@@ -84,10 +88,8 @@ class Net(Net):
         try:
             for intf in self.interface:
                 new_stats = self.get_stats()
-                down = new_stats[intf]['down'] - \
-                    self.stats[intf]['down']
-                up = new_stats[intf]['up'] - \
-                    self.stats[intf]['up']
+                down = new_stats[intf]["down"] - self.stats[intf]["down"]
+                up = new_stats[intf]["up"] - self.stats[intf]["up"]
 
                 down = down / self.update_interval
                 up = up / self.update_interval
@@ -98,30 +100,35 @@ class Net(Net):
                 down = down + down_letter
                 up = up + up_letter
 
-            return down.rjust(5) + '  ' + up.ljust(5)
+            return down.rjust(5) + "  " + up.ljust(5)
 
         except Exception:
             return
 
 
 def get_bluetooth():
-    result = helpers.bash_script('~/.config/qtile/bluetooth.sh')
-    if result == 'No devices':
-        return '  '
+    result = helpers.bash_script("~/.config/qtile/bluetooth.sh")
+    if result == "No devices":
+        return "  "
     elif not result:
-        return '  '
+        return "  "
     else:
-        return '  ' + result + ' '
+        return "  " + result + " "
 
 
-def get_bitcoin():
-    GBP_API_URL = 'https://blockchain.info/tobtc?currency=GBP&value=1'
-    gbp = requests.get(GBP_API_URL)
-    gbp = str(int(1 / float(gbp.text)))
-    return '  £' + gbp + ' '
+def get_ex():
+    GBP_API_URL = "https://www.dahsing.com/dsb_common/fx/en/FXRateOutput.xml"
+    res = requests.get(GBP_API_URL)
+    root = xmltodict.parse(res.content)
+    gbp = float(root["FxRate"]["FxRateItem"][6]["bankSellHK"])
+    return "   HKD" + str(round(gbp, 3)) + " "
 
 
 def get_im():
     im = helpers.bash_command(
-        'if [ $(fcitx5-remote) == "2" ]; then echo ZH; else echo EN; fi')
-    return '  '+im+' '
+        'if [ $(fcitx5-remote) == "2" ]; then echo ZH; else echo EN; fi'
+    )
+    enabled = helpers.bash_command(
+        'if [ $(cat ~/.keyboard) == "enabled" ]; then echo " "; else echo ; fi'
+    )
+    return " " + enabled + " " + im + " "

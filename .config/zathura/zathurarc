@@ -1,5 +1,4 @@
 set recolor
-set adjust-open width
 set guioptions none
 set recolor-keephue "true"
 set selection-clipboard clipboard
@@ -39,8 +38,6 @@ set render-loading-fg           "#282a36" # Background
 set render-loading-bg           "#f8f8f2" # Foreground
 
 # Recolor mode settings
-#
-#
 set recolor-lightcolor          "#282a36" # Background
 set recolor-darkcolor           "#f8f8f2" # Foreground
 

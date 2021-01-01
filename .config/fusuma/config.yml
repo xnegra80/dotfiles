@@ -10,7 +10,7 @@ swipe:
     left:
       command: "qtile-cmd -o screen -f prev_group"
     up:
-      command: 'qtile-cmd -o group "0" -f toscreen'
+      command: "qtile-cmd -o group 'win' -f toscreen"
 pinch:
   in:
     command: "xdotool key ctrl+equal"

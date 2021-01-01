@@ -87,6 +87,18 @@
      ((use-region-p) (comment-or-uncomment-region (region-beginning) (region-end)))
      (t (comment-or-uncomment-region (line-beginning-position) (line-end-position))))));
 (map! "C-/" #'comment-or-uncomment-line-or-region )
+(setq org-hide-emphasis-markers t)
+(require 'elcord)
+(elcord-mode)
+
+(after! ispell
+  ;; Don't spellcheck org blocks
+  (pushnew! ispell-skip-region-alist
+            '(":\\(PROPERTIES\\|LOGBOOK\\):" . ":END:")
+            '("#\\+BEGIN_SRC" . "#\\+END_SRC")
+            '("#\\+BEGIN_EXAMPLE" . "#\\+END_EXAMPLE"))
+
+  )
 
 ;; to get information about any of these functions/macros, move the cursor over
 ;; the highlighted symbol at press 'k' (non-evil users must press 'c-c c k').

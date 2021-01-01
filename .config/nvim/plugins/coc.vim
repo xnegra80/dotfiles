@@ -1,7 +1,6 @@
 
 let g:coc_global_extensions=[
       \ 'coc-prettier',
-      \ 'coc-tsserver',
       \ 'coc-css',
       \ 'coc-json',
       \ 'coc-eslint',
@@ -9,6 +8,7 @@ let g:coc_global_extensions=[
       \ 'coc-phpls',
       \ 'coc-markdownlint',
       \ 'coc-styled-components',
+      \ 'coc-go',
       \ 'coc-vimlsp'
       \ ]
 

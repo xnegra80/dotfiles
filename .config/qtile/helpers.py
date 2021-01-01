@@ -5,19 +5,15 @@ import iwlib
 
 def get_interface_status(interface_name):
     interface = iwlib.get_iwconfig(interface_name)
-    if 'stats' not in interface:
+    if "stats" not in interface:
         return None, None
-    quality = interface['stats']['quality']
-    essid = bytes(interface['ESSID']).decode()
+    quality = interface["stats"]["quality"]
+    essid = bytes(interface["ESSID"]).decode()
     return essid, quality
 
 
 def _bash(arg):
-    return Popen(
-        arg,
-        shell=True,
-        stdout=PIPE
-    ).communicate()[0].decode('utf-8').strip()
+    return Popen(arg, shell=True, stdout=PIPE).communicate()[0].decode("utf-8").strip()
 
 
 def bash_script(path):
@@ -29,4 +25,13 @@ def bash_command(command):
 
 
 def get_interface():
-    return bash_command("nmcli device status | grep wifi | awk '{print $1}' | sed 1q")
+    interface = bash_command(
+        "nmcli device status | grep ethernet | grep connected | awk '{print $1}' | sed 1q"
+    )
+    return (
+        interface
+        if interface
+        else bash_command(
+            "nmcli device status | grep wifi | grep connected | awk '{print $1}' | sed 1q"
+        )
+    )
