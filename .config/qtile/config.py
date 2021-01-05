@@ -120,7 +120,8 @@ keys = [
     Key(
         [mod, "control"],
         "d",
-        lazy.spawn([os.path.expanduser("~/.config/rofi/scripts/monitor-layout.sh")]),
+        lazy.spawn(
+            [os.path.expanduser("~/.config/rofi/scripts/monitor-layout.sh")]),
     ),
     Key([mod, "control"], "b", lazy.spawn("rofi-bluetooth")),
     Key([], "Print", lazy.spawn("rofi-screenshot")),
@@ -218,7 +219,8 @@ for i in range(10):
     keys.extend(
         [
             Key([mod], name, lazy.group[name].toscreen()),
-            Key([mod, "shift"], name, lazy.window.togroup(name, switch_group=True)),
+            Key([mod, "shift"], name, lazy.window.togroup(
+                name, switch_group=True)),
         ]
     )
 
@@ -347,7 +349,7 @@ def get_widgets():
         widget.GenPollText(
             func=custom_widget.get_ex,
             foreground=get_color("yellow"),
-            update_interval=5,
+            update_interval=3000,
         ),
         widget.CPUGraph(**get_graph_theme("green")),
         widget.MemoryGraph(**get_graph_theme("cyan")),
@@ -377,13 +379,15 @@ def get_widgets():
             background=get_color("grey"),
             step=5,
         ),
-        widget.Clock(foreground=get_color("orange"), format=" %b %d %a %l:%M %p "),
+        widget.Clock(foreground=get_color("orange"),
+                     format=" %b %d %a %l:%M %p "),
     ]
 
 
 screens = [
     Screen(
-        top=bar.Bar(get_widgets(), 24, background=get_color("background"), opacity=0.9)
+        top=bar.Bar(get_widgets(), 24, background=get_color(
+            "background"), opacity=0.9)
     )
     for _ in range(len(get_monitors()))
 ]
@@ -423,6 +427,7 @@ floating_layout = layout.Floating(
         {"role": "task_dialog"},
         {"wname": "Module"},
         {"wname": "anydesk"},
+        {"wname": "Insync"},
         {"wname": "galculator"},
         {"wmclass": "gnome-network-displays"},
         {"wname": "Picture-in-picture"},

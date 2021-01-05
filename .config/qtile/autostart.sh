@@ -12,8 +12,8 @@ fcitx5&
 /usr/lib/mate-polkit/polkit-mate-authentication-agent-1&
 sudo tzupdate&
 redshift -l geoclue2&
-spotifyd&
 emacs --daemon&
 echo "enabled" > ~/.keyboard&
 insync start&
 discord --start-minimized&
+spotifyd&

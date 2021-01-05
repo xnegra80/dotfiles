@@ -8,6 +8,9 @@ set -U fish_user_paths $HOME/.emacs.d/bin $fish_user_paths
 
 if status is-interactive
    pfetch
+   abbr --add --global yc 'yay -Yc'
+   abbr --add --global yu 'sudo pacman -Sy && sudo powerpill -Su && yay -Su'
+   abbr --add --global df 'dotfiles'
 end
 starship init fish | source
 

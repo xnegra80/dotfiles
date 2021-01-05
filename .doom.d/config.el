@@ -90,6 +90,7 @@
 (setq org-hide-emphasis-markers t)
 (require 'elcord)
 (elcord-mode)
+(add-hook 'before-save-hook #'+format|buffer nil t)
 
 (after! ispell
   ;; Don't spellcheck org blocks
