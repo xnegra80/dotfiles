@@ -66,9 +66,9 @@
 (setq scroll-margin 1)
 (setq scroll-conservatively 9999)
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
-  (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
-  (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
-  (setq scroll-step 1)
+(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+(setq scroll-step 1)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -90,7 +90,8 @@
 (setq org-hide-emphasis-markers t)
 (require 'elcord)
 (elcord-mode)
-(add-hook 'before-save-hook #'+format|buffer nil t)
+(setq elcord-use-major-mode-as-main-icon t)
+(setq elcord-display-elapsed nil)
 
 (after! ispell
   ;; Don't spellcheck org blocks
@@ -100,8 +101,14 @@
             '("#\\+BEGIN_EXAMPLE" . "#\\+END_EXAMPLE"))
 
   )
-
-;; to get information about any of these functions/macros, move the cursor over
+(setq all-the-icons-scale-factor 1.1)
+(after! doom-modeline
+  (doom-modeline-def-modeline 'main
+    '(bar matches buffer-info remote-host buffer-position parrot selection-info)
+    '(misc-info minor-modes checker input-method buffer-encoding major-mode process vcs "  "))) ; <-- added padding here;; to get information about any of these functions/macros, move the cursor over
+;; (custom-set-faces!
+;;   '(mode-line :family "Noto Sans" :height 0.9)
+;;   '(mode-line-inactive :family "Noto Sans" :height 0.9))
 ;; the highlighted symbol at press 'k' (non-evil users must press 'c-c c k').
 ;; This will open documentation for it, including demos of how they are used.
 ;;
