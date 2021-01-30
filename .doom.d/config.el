@@ -23,6 +23,7 @@
       doom-variable-pitch-font (font-spec :family "VictorMono Nerd Font" :size 15)
       doom-big-font (font-spec :family "VictorMono Nerd Font" :size 24)
 )
+(setq ispell-dictionary "british")    ;set the default dictionary
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -92,6 +93,8 @@
 (elcord-mode)
 (setq elcord-use-major-mode-as-main-icon t)
 (setq elcord-display-elapsed nil)
+(after! evil-org
+  (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
 
 (after! ispell
   ;; Don't spellcheck org blocks

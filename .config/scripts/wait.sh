@@ -13,7 +13,3 @@ xidlehook \
   --timer 300 \
     '~/.config/scripts/lock.sh & sleep 5 && xset dpms force off' \
     '' \
-  `# Finally, suspend an hour after it locks` \
-  --timer 3600 \
-    'systemctl suspend' \
-    ''

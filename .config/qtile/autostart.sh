@@ -14,6 +14,5 @@ sudo tzupdate&
 redshift -l geoclue2&
 emacs --daemon&
 echo "enabled" > ~/.keyboard&
-insync start&
 discord --start-minimized&
-spotifyd&
+insync start
