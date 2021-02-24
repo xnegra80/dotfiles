@@ -6,13 +6,11 @@ dunst&
 ferdi&
 evolution&
 fusuma -d&
-discord --start-minimized&
 fcitx5&
-~/.config/scripts/wait.sh
-/usr/lib/mate-polkit/polkit-mate-authentication-agent-1&
+discord --start-minimized&
+~/.config/scripts/wait.sh&
+/usr/bin/lxpolkit&
 sudo tzupdate&
 redshift -l geoclue2&
 emacs --daemon&
 echo "enabled" > ~/.keyboard&
-discord --start-minimized&
-insync start

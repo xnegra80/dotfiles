@@ -121,7 +121,7 @@ def get_ex():
     res = requests.get(GBP_API_URL)
     root = xmltodict.parse(res.content)
     gbp = float(root["FxRate"]["FxRateItem"][6]["bankSellHK"])
-    return "   HKD" + str(round(gbp, 3)) + " "
+    return " /" + str(round(gbp, 3)) + " "
 
 
 def get_im():
@@ -132,3 +132,10 @@ def get_im():
         'if [ $(cat ~/.keyboard) == "enabled" ]; then echo " "; else echo ; fi'
     )
     return " " + enabled + " " + im + " "
+
+
+def get_insync():
+    status = helpers.bash_command(
+        "insync-headless status | grep status | awk '{print $3}'"
+    )
+    return "  " + status.capitalize() + " "

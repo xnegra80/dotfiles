@@ -9,8 +9,8 @@ set -U fish_user_paths $HOME/.emacs.d/bin $fish_user_paths
 
 if status is-interactive
    pfetch
-   abbr --add --global yc 'yay -Yc'
-   abbr --add --global yu 'yay -Syu'
+   abbr --add --global p 'paru'
+   abbr --add --global pc 'paru -c'
    abbr --add --global df 'dotfiles'
    abbr --add --global v 'vim'
    abbr --add --global e 'emacs'
