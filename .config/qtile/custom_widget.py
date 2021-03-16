@@ -3,9 +3,11 @@ from libqtile.widget.sensors import ThermalSensor
 from libqtile.widget.wlan import Wlan
 from libqtile.widget.net import Net
 from libqtile.widget import base
+from pycoingecko import CoinGeckoAPI
 import helpers
 import requests
 import re
+import datetime
 import xmltodict
 
 
@@ -20,18 +22,17 @@ class Volume(Volume):
         if self.volume == -1:
             self.text = ""
         elif self.volume == 0:
-            self.text = " {}%".format(self.volume)
+            self.text = ""
         elif self.volume < 10:
-            self.text = " {}%".format(self.volume)
+            self.text = ""
         elif self.volume <= 30:
-            self.text = " {}%".format(self.volume)
+            self.text = ""
         elif self.volume < 80:
-            self.text = " {}%".format(self.volume)
+            self.text = ""
         elif self.volume < 100:
-            self.text = " {}%".format(self.volume)
+            self.text = ""
         else:
-            self.text = " {}%".format(self.volume)
-        self.text = self.text.center(8)
+            self.text = ""
 
 
 class ThermalSensor(ThermalSensor):
@@ -47,7 +48,7 @@ class ThermalSensor(ThermalSensor):
         else:
             self.layout.colour = self.foreground_normal
         text = " " + re.sub(r"\.\d", "", text)
-        return text.center(8)
+        return text.center(6)
 
 
 class Wlan(Wlan):
@@ -59,7 +60,7 @@ class Wlan(Wlan):
             if helpers.bash_command(
                 "nmcli device status | grep ethernet | grep connected"
             ):
-                return self.format.format(essid="", icon=" ", vpn=vpn)
+                return self.format.format(essid="", icon="", vpn=vpn)
             essid, quality = helpers.get_interface_status(self.interface)
             disconnected = essid is None
 
@@ -100,7 +101,7 @@ class Net(Net):
                 down = down + down_letter
                 up = up + up_letter
 
-            return down.rjust(5) + "  " + up.ljust(5)
+            return down.rjust(5) + "" + up.ljust(5)
 
         except Exception:
             return
@@ -109,11 +110,43 @@ class Net(Net):
 def get_bluetooth():
     result = helpers.bash_script("~/.config/qtile/bluetooth.sh")
     if result == "No devices":
-        return "  "
+        return " "
     elif not result:
-        return "  "
+        return " "
     else:
-        return "  " + result + " "
+        return " " + result
+
+
+def get_crypto():
+    cryptos = dict(
+        btc="bitcoin",
+        eth="ethereum",
+        bnb="binancecoin",
+        ada="cardano",
+        cro="crypto-com-coin",
+        nexo="nexo",
+        cake="pancakeswap-token",
+        bifi="beefy-finance",
+        watch="yieldwatch",
+        kebab="kebab-token",
+        bdo="bdollar",
+        salt="saltswap",
+    )
+
+    try:
+        cg = CoinGeckoAPI()
+        symbol = list(cryptos.keys())[datetime.datetime.now().minute % len(cryptos)]
+        crypto = cryptos[symbol]
+
+        price = cg.get_price(
+            ids=crypto, vs_currencies="hkd", include_24hr_change="true"
+        )
+        price, change = price[crypto]["hkd"], price[crypto]["hkd_24h_change"]
+        if change > 0:
+            change = "+" + str(round(change, 1)) + "%"
+            return symbol.upper() + ":$" + str(price) + " " + change
+    except Exception:
+        return "Error {}".format(crypto)
 
 
 def get_ex():
@@ -121,7 +154,7 @@ def get_ex():
     res = requests.get(GBP_API_URL)
     root = xmltodict.parse(res.content)
     gbp = float(root["FxRate"]["FxRateItem"][6]["bankSellHK"])
-    return " /" + str(round(gbp, 3)) + " "
+    return "/" + str(round(gbp, 3))
 
 
 def get_im():
@@ -131,11 +164,4 @@ def get_im():
     enabled = helpers.bash_command(
         'if [ $(cat ~/.keyboard) == "enabled" ]; then echo " "; else echo ; fi'
     )
-    return " " + enabled + " " + im + " "
-
-
-def get_insync():
-    status = helpers.bash_command(
-        "insync-headless status | grep status | awk '{print $3}'"
-    )
-    return "  " + status.capitalize() + " "
+    return enabled + " " + im

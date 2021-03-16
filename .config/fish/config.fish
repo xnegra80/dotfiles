@@ -1,7 +1,7 @@
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias ls='exa --icons'
 alias vim='nvim'
-alias emacs='devour emacs'
+alias emacs='devour emacsclient -c'
 
 export VISUAL=emacs
 export EDITOR="$VISUAL"

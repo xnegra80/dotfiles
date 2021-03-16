@@ -6,11 +6,11 @@ swipe:
       command: "xdotool key alt+Right"
   4:
     right:
-      command: "qtile-cmd -o screen -f next_group"
+      command: "qtile cmd-obj -o screen -f next_group"
     left:
-      command: "qtile-cmd -o screen -f prev_group"
+      command: "qtile cmd-obj -o screen -f prev_group"
     up:
-      command: "qtile-cmd -o group 'win' -f toscreen"
+      command: "qtile cmd-obj -o group 'win' -f toscreen"
 pinch:
   in:
     command: "xdotool key ctrl+equal"

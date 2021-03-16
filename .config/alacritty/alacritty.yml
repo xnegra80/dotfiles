@@ -55,4 +55,6 @@ scrolling:
   multiplier: 1
 
 env:
-  TERM: alacritty
+  TERM: xterm-256color
+key_bindings:
+  - { key: Return, mods: Control|Shift, action: SpawnNewInstance }

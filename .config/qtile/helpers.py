@@ -1,4 +1,5 @@
 from subprocess import Popen, PIPE
+from libqtile.lazy import lazy
 import os
 import iwlib
 
@@ -35,3 +36,11 @@ def get_interface():
             "nmcli device status | grep wifi | grep connected | awk '{print $1}' | sed 1q"
         )
     )
+
+
+def spawn_once(program):
+    exists = bash_command(
+        "if pgrep -x '{}' > /dev/null; then echo 'True'; fi".format(program)
+    )
+    # if not exists:
+    #   bash_command(program)

@@ -1,4 +1,4 @@
-from libqtile.config import Key, Screen, Group, Drag, Click, ScratchPad, DropDown
+from libqtile.config import Key, Screen, Group, Drag, Click, Match
 from libqtile.lazy import lazy
 from libqtile import layout, bar, widget, hook, extension
 
@@ -9,7 +9,22 @@ import subprocess
 from screeninfo import get_monitors
 
 mod = "mod4"
+alt = "mod1"
 term = "alacritty"
+
+autostart = [
+    "picom",
+    "feh --bg-fill ~/Pictures/wallpaper",
+    "dunst",
+    "ferdi",
+    "fusuma -d",
+    "fcitx5",
+    "~/.config/scripts/wait.sh",
+    "/usr/bin/lxpolkit",
+    "sudo tzupdate",
+    "insync start",
+    "redshift -l geoclue2" "echo 'enabled' > ~/.keyboard",
+]
 
 
 def get_color(key):
@@ -27,33 +42,33 @@ def get_color(key):
     return colors[key]
 
 
-@hook.subscribe.client_new
-def window_match(window):
-    matches = {
-        "ferdi": 1,
-        "brave-browser": 2,
-        "reddit": 2,
-        "io.github.celluloid_player.Celluloid": 5,
-        "evolution": 6,
-        "TablePlus": 7,
-        "lutris": 8,
-        "deluge": 9,
-        "insomnia": 9,
-        "crx_pjibgclleladliembfgfagdaldikeohf": 0,
-        "discord": "discord",
-        "virt-viewer": "win",
-        "org.remmina.Remmina": "win",
-    }
+# @hook.subscribe.client_new
+# def window_match(window):
+#     matches = {
+#         "ferdi": 1,
+#         "brave-browser": 2,
+#         "reddit": 2,
+#         "io.github.celluloid_player.Celluloid": 5,
+#         "TablePlus": 7,
+#         "lutris": 8,
+#         "deluge": 9,
+#         "insomnia": 9,
+#         "spotify": 0,
+#         "discord": "discord",
+#         "mailspring": "mailspring",
+#         "virt-viewer": "win",
+#         "org.remmina.Remmina": "win",
+#     }
 
-    for wmclass, group in matches.items():
-        if window.match(wmclass=wmclass):
-            window.togroup(str(group), switch_group=True)
-            break
+#     for wmclass, group in matches.items():
+#         if window.match(Match(wm_class=wmclass)):
+#             window.togroup(str(group), switch_group=True)
+#             break
 
 
-@hook.subscribe.startup_once
-def autostart():
-    subprocess.Popen(os.path.expanduser("~/.config/qtile/autostart.sh"))
+# @hook.subscribe.startup_once
+# def autostart():
+#     subprocess.Popen(os.path.expanduser("~/.config/qtile/autostart.sh"))
 
 
 keys = [
@@ -69,19 +84,34 @@ keys = [
     Key([mod], "v", lazy.spawn("pavucontrol")),
     Key([mod], "c", lazy.spawn("emacs")),
     Key([mod], "w", lazy.spawn("brave")),
-    Key([mod], "s", lazy.spawn("spotify")),
-    Key([mod], "m", lazy.spawn("evolution")),
+    Key(
+        [mod],
+        "s",
+        # lazy.spawn("spotify"),
+        lazy.spawn([os.path.expanduser("~/.config/scripts/spotify.sh")]),
+    ),
     Key(
         [mod],
         "o",
-        lazy.group["discord"].toscreen(),
-        lazy.spawn("discord"),
+        lazy.group["discord"].toscreen(toggle=False),
+    ),
+    Key(
+        [mod],
+        "m",
+        lazy.group["mailspring"].toscreen(toggle=False),
+        lazy.spawn("mailspring"),
+    ),
+    Key(
+        [mod],
+        "p",
+        lazy.spawn("killall picom"),
+        lazy.spawn("picom"),
     ),
     Key([mod], "y", lazy.spawn("celluloid --mpv-options=--fs")),
     # CLI applications
     Key([mod], "Return", lazy.spawn(term)),
     Key([mod], "r", lazy.spawn(f"{term} --class reddit -e tuir")),
-    Key([mod], "e", lazy.group["scratchpad"].dropdown_toggle("ranger")),
+    Key([mod], "e", lazy.spawn(f"{term} -e sh -c 'sleep 0.1 && ranger'")),
     # rofi menus
     Key([mod], "d", lazy.spawn("rofi -show drun")),
     Key([mod, "shift"], "d", lazy.spawn("rofi -show run")),
@@ -120,8 +150,7 @@ keys = [
     Key(
         [mod, "control"],
         "d",
-        lazy.spawn(
-            [os.path.expanduser("~/.config/rofi/scripts/monitor-layout.sh")]),
+        lazy.spawn([os.path.expanduser("~/.config/rofi/scripts/monitor-layout.sh")]),
     ),
     Key([mod, "control"], "b", lazy.spawn("rofi-bluetooth")),
     Key([], "Print", lazy.spawn("rofi-screenshot")),
@@ -189,28 +218,38 @@ keys = [
     Key([mod, "shift"], "r", lazy.restart()),
 ]
 
-scratchpad_config = dict(
-    x=0.2, y=0.1, width=0.6, height=0.8, opacity=1, on_focus_lost_hide=True
-)
 groups = [
-    ScratchPad(
-        "scratchpad",
-        [
-            DropDown("ranger", f"{term} -e ranger", **scratchpad_config),
-        ],
-    ),
-    Group("1", label="", layout="stack"),
+    Group("1", label="", layout="stack", spawn=autostart),
     Group("2", label="", layout="monadtall"),
     Group("3", label="", layout="ratiotile"),
     Group("4", label="", layout="monadtall"),
     Group("5", label="", layout="monadtall"),
-    Group("6", label="", layout="monadtall"),
+    Group("6", label="6", layout="monadtall"),
     Group("7", label="", layout="stack"),
     Group("8", label="", layout="stack"),
     Group("9", label="", layout="monadtall"),
     Group("0", label="", layout="monadtall"),
-    Group("discord", label="", layout="monadtall"),
-    Group("win", label="", layout="monadtall", persist=False),
+    Group(
+        "mailspring",
+        label="",
+        layout="monadtall",
+        spawn="mailspring",
+        matches=[Match(wm_class="mailspring")],
+    ),
+    Group(
+        "telegram",
+        label="",
+        layout="monadtall",
+        spawn="telegram-desktop",
+        matches=[Match(wm_class="telegram-desktop")],
+    ),
+    Group(
+        "discord",
+        label="",
+        layout="monadtall",
+        matches=[Match(wm_class="discord")],
+    ),
+    # Group("win", label="", layout="monadtall", persist=False),
 ]
 
 for i in range(10):
@@ -218,8 +257,7 @@ for i in range(10):
     keys.extend(
         [
             Key([mod], name, lazy.group[name].toscreen()),
-            Key([mod, "shift"], name, lazy.window.togroup(
-                name, switch_group=True)),
+            Key([mod, "shift"], name, lazy.window.togroup(name, switch_group=True)),
         ]
     )
 
@@ -266,7 +304,7 @@ layouts = [
 widget_defaults = dict(
     font="DejaVu Sans Mono, Font Awesome 5 Pro, Font Awesome 5 Brands",
     fontsize=11,
-    padding=5,
+    padding=7,
     foreground=get_color("foreground"),
 )
 
@@ -281,7 +319,7 @@ def get_graph_theme(key):
         background=get_color("grey"),
         fill_color=get_color(key),
         width=45,
-        samples=30,
+        samples=10,
     )
 
 
@@ -315,17 +353,24 @@ def get_widgets():
             border=get_color("grey"),
             urgent_border=get_color("pink"),
         ),
-        # widget.Systray(padding=3),
+        widget.Systray(padding=3),
         widget.CheckUpdates(
             custom_command="checkupdates && paru -Qua 2>/dev/null",
             colour_have_updates=get_color("pink"),
-            display_format="  {updates:>2} ",
+            display_format=" {updates:>2}",
+            background=get_color("grey"),
         ),
         widget.GenPollText(
-            func=custom_widget.get_insync,
+            func=custom_widget.get_crypto,
             foreground=get_color("yellow"),
-            background=get_color("grey"),
             update_interval=60,
+        ),
+        widget.OpenWeather(
+            location="london,uk",
+            # location="hong kong",
+            format="{location_city} {main_temp:.0f}°{units_temperature}",
+            foreground=get_color("orange"),
+            background=get_color("grey"),
         ),
         widget.GenPollText(
             func=custom_widget.get_bluetooth,
@@ -335,13 +380,13 @@ def get_widgets():
         custom_widget.Net(
             foreground=get_color("pink"),
             background=get_color("grey"),
-            format="{down} ↓↑ {up}",
+            format="{down}↓↑{up}",
             interface=helpers.get_interface(),
         ),
         custom_widget.Wlan(
             foreground=get_color("green"),
             interface=helpers.get_interface(),
-            format=" {icon} {essid} {vpn}",
+            format="{icon}{essid}{vpn}",
         ),
         widget.GenPollText(
             func=custom_widget.get_im,
@@ -359,13 +404,13 @@ def get_widgets():
         widget.SwapGraph(**get_graph_theme("primary")),
         custom_widget.ThermalSensor(foreground=get_color("cyan")),
         widget.Backlight(
-            format="  {percent:2.0%} ",
+            format=" {percent:2.0%}",
             foreground=get_color("pink"),
             background=get_color("grey"),
             backlight_name="intel_backlight",
         ),
         widget.Battery(
-            format=" {char} {percent:2.0%} ",
+            format="{char} {percent:2.0%}",
             foreground=get_color("green"),
             unknown_char="",
             charge_char="",
@@ -377,26 +422,29 @@ def get_widgets():
             update_interval=0.2,
         ),
         custom_widget.Volume(
-            width=65,
+            width=15,
+            foreground=get_color("yellow"),
+            background=get_color("grey"),
+        ),
+        widget.Volume(
+            # width=65,
             foreground=get_color("yellow"),
             background=get_color("grey"),
             step=5,
         ),
-        widget.Clock(foreground=get_color("orange"),
-                     format=" %b %d %a %l:%M %p "),
+        widget.Clock(foreground=get_color("orange"), format="%b %d %a %l:%M %p"),
     ]
 
 
 screens = [
     Screen(
-        top=bar.Bar(get_widgets(), 24, background=get_color(
-            "background"), opacity=0.9)
+        top=bar.Bar(get_widgets(), 24, background=get_color("background"), opacity=0.9)
     )
     for _ in range(len(get_monitors()))
 ]
 
 
-@hook.subscribe.screen_change
+# @hook.subscribe.screen_change
 def pop_monitor():
     while len(get_monitors()) < len(screens):
         screens.pop(-1)
@@ -422,61 +470,24 @@ bring_front_click = False
 cursor_warp = False
 floating_layout = layout.Floating(
     float_rules=[
-        {"role": "EventDialog"},
-        {"role": "Msgcompose"},
-        {"role": "Preferences"},
-        {"role": "pop-up"},
-        {"role": "prefwindow"},
-        {"role": "task_dialog"},
-        {"wname": "Module"},
-        {"wname": "anydesk"},
-        {"wname": "galculator"},
-        {"wmclass": "gnome-network-displays"},
-        {"wname": "Picture-in-picture"},
-        {"wname": "Search Dialog"},
-        {"wname": "Goto"},
-        {"wname": "IDLE Preferences"},
-        {"wname": "Sozi"},
-        {"wname": "Create new database"},
-        {"wname": "Preferences"},
-        {"wname": "File Transfer"},
-        {"wname": "branchdialog"},
-        {"wname": "pinentry"},
-        {"wname": "confirm"},
-        {"wmclass": "dialog"},
-        {"wmclass": "blueman-manager"},
-        {"wmclass": "nm-connection-editor"},
-        {"wmclass": "download"},
-        {"wmclass": "error"},
-        {"wmclass": "file_progress"},
-        {"wmclass": "notification"},
-        {"wmclass": "splash"},
-        {"wmclass": "toolbar"},
-        {"wmclass": "confirmreset"},
-        {"wmclass": "makebranch"},
-        {"wmclass": "maketag"},
-        {"wmclass": "Dukto"},
-        {"wmclass": "Tilda"},
-        {"wmclass": "GoldenDict"},
-        {"wmclass": "Synapse"},
-        {"wmclass": "TelegramDesktop"},
-        {"wmclass": "notify"},
-        {"wmclass": "Lxappearance"},
-        {"wmclass": "Oblogout"},
-        {"wmclass": "Pavucontrol"},
-        {"wmclass": "Skype"},
-        {"wmclass": "Eog"},
-        {"wmclass": "Rhythmbox"},
-        {"wmclass": "obs"},
-        {"wmclass": "Gufw.py"},
-        {"wmclass": "Catfish"},
-        {"wmclass": "LibreOffice 3.4"},
-        {"wmclass": "ssh-askpass"},
-        {"wmclass": "Mlconfig"},
+        Match(wm_type="utility"),
+        Match(wm_type="notification"),
+        Match(wm_type="toolbar"),
+        Match(wm_type="splash"),
+        Match(wm_type="dialog"),
+        Match(wm_class="file_progress"),
+        Match(wm_class="confirm"),
+        Match(wm_class="dialog"),
+        Match(wm_class="download"),
+        Match(wm_class="error"),
+        Match(wm_class="notification"),
+        Match(wm_class="splash"),
+        Match(wm_class="toolbar"),
+        Match(func=lambda c: c.has_fixed_size()),
     ],
     **layout_theme,
 )
-auto_fullscreen = True
+auto_fullscreen = False
 bring_front_click = False
 focus_on_window_activation = "smart"
 floating_types = [

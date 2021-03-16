@@ -102,6 +102,6 @@ SEL=$( gen_entries | rofi -dmenu -p "Monitor Setup" -no-custom  | awk '{print $1
 $( ${COMMANDS[$SEL]} )
 
 if [ -n "$SEL" ]; then
-  qtile-cmd -o cmd -f restart
+  qtile cmd-obj -o cmd -f restart
   feh --bg-fill ~/Pictures/wallpaper.png
 fi

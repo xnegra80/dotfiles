@@ -29,11 +29,21 @@
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-dracula)
 
+;; Connect to main workspace on incomming emacsclient session
+(after! persp-mode
+  (setq persp-emacsclient-init-frame-behaviour-override "main"))
+
+;; whitespace
+(remove-hook 'after-change-major-mode-hook #'doom-highlight-non-default-indentation-h)
+
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/x/notes/")
+(setq org-hide-emphasis-markers t)
+
 (require 'org-superstar)
 (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+
 (defun org-checkbox-todo ()
   "Switch header TODO state to DONE when all checkboxes are ticked, to TODO otherwise"
   (let ((todo-state (org-get-todo-state)) beg end)
@@ -59,6 +69,7 @@
         (unless (string-equal todo-state "TODO")
           (org-todo 'todo)))))))))
 (add-hook 'org-checkbox-statistics-hook 'org-checkbox-todo)
+
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
@@ -87,11 +98,7 @@
      ((use-region-p) (comment-or-uncomment-region (region-beginning) (region-end)))
      (t (comment-or-uncomment-region (line-beginning-position) (line-end-position))))));
 (map! "C-/" #'comment-or-uncomment-line-or-region )
-(setq org-hide-emphasis-markers t)
-(require 'elcord)
-(elcord-mode)
-(setq elcord-use-major-mode-as-main-icon t)
-(setq elcord-display-elapsed nil)
+
 (after! evil-org
   (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
 
@@ -103,11 +110,23 @@
             '("#\\+BEGIN_EXAMPLE" . "#\\+END_EXAMPLE"))
 
   )
+
 (setq all-the-icons-scale-factor 1.1)
 (after! doom-modeline
   (doom-modeline-def-modeline 'main
     '(bar matches buffer-info remote-host buffer-position parrot selection-info)
     '(misc-info minor-modes checker input-method buffer-encoding major-mode process vcs "  "))) ; <-- added padding here;; to get information about any of these functions/macros, move the cursor over
+
+(use-package! doas-edit
+  :if (executable-find "doas")
+  :commands doas-edit-find-file doas-edit
+  :init
+  (map!
+    [remap doom/sudo-find-file] #'doas-edit-find-file
+    [remap doom/sudo-this-file] #'doas-edit))
+
+(setq csv-separators '("," "	" ";"))
+
 ;; (custom-set-faces!
 ;;   '(mode-line :family "Noto Sans" :height 0.9)
 ;;   '(mode-line-inactive :family "Noto Sans" :height 0.9))

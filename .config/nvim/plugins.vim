@@ -4,7 +4,7 @@ call plug#begin('~/.config/nvim/autoload/plugged')
     " Better Syntax Support
     Plug 'sheerun/vim-polyglot'
     " Intellisense
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    Plug 'neoclide/coc.nvim'
     " Statusline
     Plug 'vim-airline/vim-airline'
     " Session Manager
