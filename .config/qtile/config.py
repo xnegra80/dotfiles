@@ -1,4 +1,4 @@
-from libqtile.config import Key, Screen, Group, Drag, Click, Match
+from libqtile.config import Key, Screen, Group, Drag, Click, Match, ScratchPad, DropDown
 from libqtile.lazy import lazy
 from libqtile import layout, bar, widget, hook, extension
 
@@ -9,8 +9,8 @@ import subprocess
 from screeninfo import get_monitors
 
 mod = "mod4"
-alt = "mod1"
 term = "alacritty"
+tui = "alacritty -e env COLUMNS= LINES= "
 
 autostart = [
     "picom",
@@ -19,7 +19,7 @@ autostart = [
     "ferdi",
     "fusuma -d",
     "fcitx5",
-    "~/.config/scripts/wait.sh",
+    os.path.expanduser("~/.config/scripts/wait.sh"),
     "/usr/bin/lxpolkit",
     "sudo tzupdate",
     "insync start",
@@ -42,35 +42,6 @@ def get_color(key):
     return colors[key]
 
 
-# @hook.subscribe.client_new
-# def window_match(window):
-#     matches = {
-#         "ferdi": 1,
-#         "brave-browser": 2,
-#         "reddit": 2,
-#         "io.github.celluloid_player.Celluloid": 5,
-#         "TablePlus": 7,
-#         "lutris": 8,
-#         "deluge": 9,
-#         "insomnia": 9,
-#         "spotify": 0,
-#         "discord": "discord",
-#         "mailspring": "mailspring",
-#         "virt-viewer": "win",
-#         "org.remmina.Remmina": "win",
-#     }
-
-#     for wmclass, group in matches.items():
-#         if window.match(Match(wm_class=wmclass)):
-#             window.togroup(str(group), switch_group=True)
-#             break
-
-
-# @hook.subscribe.startup_once
-# def autostart():
-#     subprocess.Popen(os.path.expanduser("~/.config/qtile/autostart.sh"))
-
-
 keys = [
     # -----------------------------------*----------------------------------- #
     # ---------------------------Launch Applications------------------------- #
@@ -82,18 +53,13 @@ keys = [
     Key([mod], "i", lazy.spawn("insomnia")),
     Key([mod], "t", lazy.spawn("tableplus")),
     Key([mod], "v", lazy.spawn("pavucontrol")),
-    Key([mod], "c", lazy.spawn("emacs")),
+    Key([mod], "c", lazy.spawn("emacsclient -c")),
     Key([mod], "w", lazy.spawn("brave")),
     Key(
-        [mod],
-        "s",
-        # lazy.spawn("spotify"),
-        lazy.spawn([os.path.expanduser("~/.config/scripts/spotify.sh")]),
-    ),
-    Key(
-        [mod],
-        "o",
+        [mod, "control"],
+        "d",
         lazy.group["discord"].toscreen(toggle=False),
+        lazy.spawn("discord"),
     ),
     Key(
         [mod],
@@ -108,10 +74,16 @@ keys = [
         lazy.spawn("picom"),
     ),
     Key([mod], "y", lazy.spawn("celluloid --mpv-options=--fs")),
+    # Scratchpads
+    Key(
+        [mod],
+        "s",
+        lazy.group["scratchpad"].dropdown_toggle("spotify"),
+    ),
+    Key([mod], "e", lazy.group["scratchpad"].dropdown_toggle("ranger")),
     # CLI applications
     Key([mod], "Return", lazy.spawn(term)),
     Key([mod], "r", lazy.spawn(f"{term} --class reddit -e tuir")),
-    Key([mod], "e", lazy.spawn(f"{term} -e sh -c 'sleep 0.1 && ranger'")),
     # rofi menus
     Key([mod], "d", lazy.spawn("rofi -show drun")),
     Key([mod, "shift"], "d", lazy.spawn("rofi -show run")),
@@ -149,7 +121,7 @@ keys = [
     ),
     Key(
         [mod, "control"],
-        "d",
+        "s",
         lazy.spawn([os.path.expanduser("~/.config/rofi/scripts/monitor-layout.sh")]),
     ),
     Key([mod, "control"], "b", lazy.spawn("rofi-bluetooth")),
@@ -227,33 +199,60 @@ groups = [
     Group("6", label="6", layout="monadtall"),
     Group("7", label="", layout="stack"),
     Group("8", label="", layout="stack"),
-    Group("9", label="", layout="monadtall"),
-    Group("0", label="", layout="monadtall"),
     Group(
-        "mailspring",
+        "9",
         label="",
         layout="monadtall",
         spawn="mailspring",
         matches=[Match(wm_class="mailspring")],
     ),
     Group(
-        "telegram",
+        "0",
         label="",
         layout="monadtall",
         spawn="telegram-desktop",
         matches=[Match(wm_class="telegram-desktop")],
     ),
     Group(
-        "discord",
+        "minus",
         label="",
         layout="monadtall",
+        spawn="discord",
         matches=[Match(wm_class="discord")],
     ),
-    # Group("win", label="", layout="monadtall", persist=False),
+    Group(
+        "equal", label="", layout="monadtall", matches=[Match(wm_class="virt-viewer")]
+    ),
+    ScratchPad(
+        "scratchpad",
+        [
+            DropDown(
+                "ranger",
+                tui + "ranger",
+                opacity=0.88,
+                height=0.5,
+                width=0.5,
+                x=0.25,
+                y=0.25,
+                # on_focus_lost_hide=False,
+            ),
+            DropDown(
+                "spotify",
+                "spotify --force-device-scale-factor=.95",
+                opacity=0.95,
+                height=0.6,
+                width=0.6,
+                x=0.2,
+                y=0.2,
+                # on_focus_lost_hide=False,
+            ),
+        ],
+    ),
 ]
 
-for i in range(10):
-    name = str(i)
+
+for group in groups[:-2]:
+    name = group.name
     keys.extend(
         [
             Key([mod], name, lazy.group[name].toscreen()),
@@ -261,8 +260,21 @@ for i in range(10):
         ]
     )
 
+keys.extend(
+    [
+        Key(
+            [mod],
+            "equal",
+            lazy.group["equal"].toscreen(),
+            lazy.spawn(
+                "virsh start win-vm & virt-viewer -f --domain-name win-vm & notify-send ' VM connected'"
+            ),
+        )
+    ]
+)
+
 layout_theme = dict(
-    border_width=2,
+    border_width=3,
     margin=5,
     border_focus=get_color("primary"),
     border_normal=get_color("grey"),
@@ -304,7 +316,7 @@ layouts = [
 widget_defaults = dict(
     font="DejaVu Sans Mono, Font Awesome 5 Pro, Font Awesome 5 Brands",
     fontsize=11,
-    padding=7,
+    padding=5,
     foreground=get_color("foreground"),
 )
 
@@ -353,6 +365,14 @@ def get_widgets():
             border=get_color("grey"),
             urgent_border=get_color("pink"),
         ),
+        widget.Mpris2(
+            background=get_color("grey"),
+            objname="org.mpris.MediaPlayer2.spotify",
+            name="spotify",
+            display_metadata=["xesam:artist", "xesam:title"],
+            scroll_chars=10,
+            stop_pause_text="",
+        ),
         widget.Systray(padding=3),
         widget.CheckUpdates(
             custom_command="checkupdates && paru -Qua 2>/dev/null",
@@ -360,11 +380,11 @@ def get_widgets():
             display_format=" {updates:>2}",
             background=get_color("grey"),
         ),
-        widget.GenPollText(
-            func=custom_widget.get_crypto,
-            foreground=get_color("yellow"),
-            update_interval=60,
-        ),
+        # widget.GenPollText(
+        #     func=custom_widget.get_crypto,
+        #     foreground=get_color("yellow"),
+        #     update_interval=60,
+        # ),
         widget.OpenWeather(
             location="london,uk",
             # location="hong kong",
@@ -404,13 +424,13 @@ def get_widgets():
         widget.SwapGraph(**get_graph_theme("primary")),
         custom_widget.ThermalSensor(foreground=get_color("cyan")),
         widget.Backlight(
-            format=" {percent:2.0%}",
+            format="{percent:2.0%}",
             foreground=get_color("pink"),
             background=get_color("grey"),
             backlight_name="intel_backlight",
         ),
         widget.Battery(
-            format="{char} {percent:2.0%}",
+            format="{char}{percent:2.0%}",
             foreground=get_color("green"),
             unknown_char="",
             charge_char="",
@@ -432,7 +452,7 @@ def get_widgets():
             background=get_color("grey"),
             step=5,
         ),
-        widget.Clock(foreground=get_color("orange"), format="%b %d %a %l:%M %p"),
+        widget.Clock(foreground=get_color("orange"), format="%b %d %a %l:%M%p"),
     ]
 
 
@@ -487,7 +507,7 @@ floating_layout = layout.Floating(
     ],
     **layout_theme,
 )
-auto_fullscreen = False
+auto_fullscreen = True
 bring_front_click = False
 focus_on_window_activation = "smart"
 floating_types = [

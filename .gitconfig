@@ -3,3 +3,5 @@
 	email = hkgordonlee@gmail.com
 [pull]
 	rebase = false
+[init]
+	defaultBranch = master

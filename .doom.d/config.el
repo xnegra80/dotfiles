@@ -41,6 +41,7 @@
 (setq org-directory "~/x/notes/")
 (setq org-hide-emphasis-markers t)
 
+(setq treemacs-position 'right)
 (require 'org-superstar)
 (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
 
@@ -111,6 +112,8 @@
 
   )
 
+(setq projectile-project-search-path "~/dev/")
+
 (setq all-the-icons-scale-factor 1.1)
 (after! doom-modeline
   (doom-modeline-def-modeline 'main
@@ -126,6 +129,31 @@
     [remap doom/sudo-this-file] #'doas-edit))
 
 (setq csv-separators '("," "	" ";"))
+
+(require 'elcord)
+(elcord-mode)
+
+(defun elcord--disable-elcord-if-no-frames (f)
+    (declare (ignore f))
+    (when (let ((frames (delete f (visible-frame-list))))
+            (or (null frames)
+                (and (null (cdr frames))
+                     (eq (car frames) terminal-frame))))
+      (elcord-mode -1)
+      (add-hook 'after-make-frame-functions 'elcord--enable-on-frame-created)))
+
+  (defun elcord--enable-on-frame-created (f)
+    (declare (ignore f))
+    (elcord-mode +1))
+
+  (defun my/elcord-mode-hook ()
+    (if elcord-mode
+        (add-hook 'delete-frame-functions 'elcord--disable-elcord-if-no-frames)
+      (remove-hook 'delete-frame-functions 'elcord--disable-elcord-if-no-frames)))
+
+  (add-hook 'elcord-mode-hook 'my/elcord-mode-hook)
+(setq elcord-use-major-mode-as-main-icon 't)
+
 
 ;; (custom-set-faces!
 ;;   '(mode-line :family "Noto Sans" :height 0.9)

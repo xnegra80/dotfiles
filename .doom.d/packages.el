@@ -11,6 +11,7 @@
 (package! org-superstar)
 (package! org-wild-notifier)
 (package! csv-mode)
+(package! elcord)
 (package! doas-edit
   :recipe (:host github :repo "cemkeylan/doas-edit"))
 

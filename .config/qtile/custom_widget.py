@@ -9,6 +9,7 @@ import requests
 import re
 import datetime
 import xmltodict
+import sys
 
 
 class Volume(Volume):
@@ -47,8 +48,8 @@ class ThermalSensor(ThermalSensor):
             self.layout.colour = self.foreground_alert
         else:
             self.layout.colour = self.foreground_normal
-        text = " " + re.sub(r"\.\d", "", text)
-        return text.center(6)
+        text = re.sub(r"\.\d", "", text)
+        return text.center(4)
 
 
 class Wlan(Wlan):
@@ -110,11 +111,11 @@ class Net(Net):
 def get_bluetooth():
     result = helpers.bash_script("~/.config/qtile/bluetooth.sh")
     if result == "No devices":
-        return " "
-    elif not result:
-        return " "
+        return ""
     else:
-        return " " + result
+        return ""
+    # else:
+    # return "" + result
 
 
 def get_crypto():
@@ -123,14 +124,15 @@ def get_crypto():
         eth="ethereum",
         bnb="binancecoin",
         ada="cardano",
-        cro="crypto-com-coin",
+        cro="crypto-com-chain",
         nexo="nexo",
         cake="pancakeswap-token",
         bifi="beefy-finance",
-        watch="yieldwatch",
         kebab="kebab-token",
-        bdo="bdollar",
+        btd="bolt-true-dollar",
+        watch="yieldwatch",
         salt="saltswap",
+        safemoon="safemoon",
     )
 
     try:
@@ -143,18 +145,27 @@ def get_crypto():
         )
         price, change = price[crypto]["hkd"], price[crypto]["hkd_24h_change"]
         if change > 0:
-            change = "+" + str(round(change, 1)) + "%"
-            return symbol.upper() + ":$" + str(price) + " " + change
-    except Exception:
-        return "Error {}".format(crypto)
+            change = "+" + str(round(change, 1))
+        else:
+            change = str(round(change, 1))
+        return symbol.upper() + ":$" + str(price) + " " + change + "%"
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        return message + crypto
 
 
 def get_ex():
-    GBP_API_URL = "https://www.dahsing.com/dsb_common/fx/en/FXRateOutput.xml"
-    res = requests.get(GBP_API_URL)
-    root = xmltodict.parse(res.content)
-    gbp = float(root["FxRate"]["FxRateItem"][6]["bankSellHK"])
-    return "/" + str(round(gbp, 3))
+    try:
+        GBP_API_URL = "https://www.dahsing.com/dsb_common/fx/en/FXRateOutput.xml"
+        res = requests.get(GBP_API_URL)
+        root = xmltodict.parse(res.content)
+        gbp = float(root["FxRate"]["FxRateItem"][6]["bankSellHK"])
+        return "/" + str(round(gbp, 3))
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        return message
 
 
 def get_im():
@@ -162,6 +173,6 @@ def get_im():
         'if [ $(fcitx5-remote) == "2" ]; then echo ZH; else echo EN; fi'
     )
     enabled = helpers.bash_command(
-        'if [ $(cat ~/.keyboard) == "enabled" ]; then echo " "; else echo ; fi'
+        'if [ $(cat ~/.keyboard) == "enabled" ]; then echo ""; else echo ; fi'
     )
-    return enabled + " " + im
+    return enabled + im

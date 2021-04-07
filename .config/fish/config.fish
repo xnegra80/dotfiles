@@ -1,7 +1,8 @@
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
-alias ls='exa --icons'
+alias ls='colorls --dark'
 alias vim='nvim'
-alias emacs='devour emacsclient -c'
+alias cat='bat --theme=Dracula --style=plain'
+alias emacs='TERM=xterm-24bit emacsclient -t'
 
 export VISUAL=emacs
 export EDITOR="$VISUAL"
