@@ -4,12 +4,10 @@ end
 bind " " expand-abbr or self-insert
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias ls='colorls --dark'
-alias paru='paru --bottomup'
 alias cat='bat --theme=Dracula --style=plain'
 alias emacs='devour emacsclient -c'
 
 abbr --add --global p 'paru '
-abbr --add --global psyu 'paru -Syu '
 abbr --add --global pc 'paru -c '
 abbr --add --global df 'dotfiles '
 abbr --add --global bt 'bashtop '
