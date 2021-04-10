@@ -14,6 +14,8 @@ tui = "alacritty -e env COLUMNS= LINES= "
 
 autostart = [
     "picom",
+    "nm-applet",
+    "blueman-applet",
     "feh --bg-fill ~/Pictures/wallpaper",
     "dunst",
     "ferdi",
@@ -71,7 +73,7 @@ keys = [
         [mod],
         "p",
         lazy.spawn("killall picom"),
-        lazy.spawn("picom"),
+        lazy.spawn("picom --experimental-backends"),
     ),
     Key([mod], "y", lazy.spawn("celluloid --mpv-options=--fs")),
     # Scratchpads
@@ -196,7 +198,7 @@ groups = [
     Group("3", label="", layout="ratiotile"),
     Group("4", label="", layout="monadtall"),
     Group("5", label="", layout="monadtall"),
-    Group("6", label="6", layout="monadtall"),
+    Group("6", label="", layout="monadtall"),
     Group("7", label="", layout="stack"),
     Group("8", label="", layout="stack"),
     Group(
@@ -210,8 +212,8 @@ groups = [
         "0",
         label="",
         layout="monadtall",
-        spawn="telegram-desktop",
-        matches=[Match(wm_class="telegram-desktop")],
+        spawn=["telegram-desktop", "signal-desktop-beta"],
+        matches=[Match(wm_class="telegram-desktop"), Match(wm_class="signal beta")],
     ),
     Group(
         "minus",
