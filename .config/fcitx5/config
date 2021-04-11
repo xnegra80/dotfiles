@@ -3,23 +3,29 @@
 EnumerateWithTriggerKeys=True
 # Temporally switch between first and current Input Method
 AltTriggerKeys=
-# Enumerate Input Method Forward
-EnumerateForwardKeys=
-# Enumerate Input Method Backward
-EnumerateBackwardKeys=
 # Skip first input method while enumerating
 EnumerateSkipFirst=False
-# Enumerate Input Method Group Forward
-EnumerateGroupForwardKeys=
-# Enumerate Input Method Group Backward
-EnumerateGroupBackwardKeys=
-# Activate Input Method
-ActivateKeys=
-# Deactivate Input Method
-DeactivateKeys=
 
 [Hotkey/TriggerKeys]
 0=Control+Shift+Shift_L
+
+[Hotkey/EnumerateForwardKeys]
+0=Control+Shift_L
+
+[Hotkey/EnumerateBackwardKeys]
+0=Control+Shift_R
+
+[Hotkey/EnumerateGroupForwardKeys]
+0=Super+space
+
+[Hotkey/EnumerateGroupBackwardKeys]
+0=Shift+Super+space
+
+[Hotkey/ActivateKeys]
+0=Hangul_Hanja
+
+[Hotkey/DeactivateKeys]
+0=Hangul_Romaja
 
 [Hotkey/PrevPage]
 0=Up
@@ -55,8 +61,9 @@ ShowFirstInputMethodInformation=True
 DefaultPageSize=5
 # Force Enabled Addons
 EnabledAddons=
-# Force Disabled Addons
-DisabledAddons=
 # Preload input method to be used by default
 PreloadInputMethod=True
+
+[Behavior/DisabledAddons]
+0=clipboard
 

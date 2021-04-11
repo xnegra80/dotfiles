@@ -129,9 +129,13 @@
     [remap doom/sudo-this-file] #'doas-edit))
 
 (setq csv-separators '("," "	" ";"))
+(setq +workspaces-on-switch-project-behavior 'nil)
 
 (require 'elcord)
 (elcord-mode)
+
+(require 'org-wild-notifier)
+(org-wild-notifier-mode)
 
 (defun elcord--disable-elcord-if-no-frames (f)
     (declare (ignore f))
@@ -142,7 +146,7 @@
       (elcord-mode -1)
       (add-hook 'after-make-frame-functions 'elcord--enable-on-frame-created)))
 
-  (defun elcord--enable-on-frame-created (f)
+  (defun elcord--enable-on-frame-created ()
     (declare (ignore f))
     (elcord-mode +1))
 
@@ -153,6 +157,19 @@
 
   (add-hook 'elcord-mode-hook 'my/elcord-mode-hook)
 (setq elcord-use-major-mode-as-main-icon 't)
+
+;; (defun maybe-delete-frame-buffer (frame)
+;;   "When a dedicated FRAME is deleted, also kill its buffer.
+;; A dedicated frame contains a single window whose buffer is not
+;; displayed anywhere else."
+;;   (let ((windows (window-list frame)))
+;;     (when (eq 1 (length windows))
+;;       (let ((buffer (window-buffer (car windows))))
+;;         (when (eq 1 (length (get-buffer-window-list buffer nil t)))
+;;           (kill-buffer buffer))))))
+
+;; (add-to-list 'delete-frame-functions #'maybe-delete-frame-buffer)
+
 
 
 ;; (custom-set-faces!

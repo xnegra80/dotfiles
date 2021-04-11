@@ -41,7 +41,7 @@ class ThermalSensor(ThermalSensor):
         temp_values = self.get_temp_sensors()
         if temp_values is None:
             return False
-        text = ""
+        text = " "
         text += "".join(temp_values.get(self.tag_sensor, ["N/A"]))
         temp_value = float(temp_values.get(self.tag_sensor, [0])[0])
         if temp_value > self.threshold:
@@ -108,14 +108,15 @@ class Net(Net):
             return
 
 
-def get_bluetooth():
-    result = helpers.bash_script("~/.config/qtile/bluetooth.sh")
-    if result == "No devices":
-        return ""
+def get_spotify():
+    status = helpers.bash_command("playerctl status")
+    if not status == "Playing":
+        return ""
     else:
-        return ""
-    # else:
-    # return "" + result
+        artist = helpers.bash_command("playerctl metadata xesam:artist")
+        title = helpers.bash_command("playerctl metadata xesam:title")
+        title = re.sub(r" \([^()]*\)", "", title)
+        return f" {artist} - {title}"
 
 
 def get_crypto():
@@ -161,7 +162,7 @@ def get_ex():
         res = requests.get(GBP_API_URL)
         root = xmltodict.parse(res.content)
         gbp = float(root["FxRate"]["FxRateItem"][6]["bankSellHK"])
-        return "/" + str(round(gbp, 3))
+        return " " + str(round(gbp, 3))
     except Exception as ex:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(ex).__name__, ex.args)

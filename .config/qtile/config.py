@@ -13,7 +13,7 @@ term = "alacritty"
 tui = "alacritty -e env COLUMNS= LINES= "
 
 autostart = [
-    "picom",
+    "picom --experimental-backends",
     "nm-applet",
     "blueman-applet",
     "feh --bg-fill ~/Pictures/wallpaper",
@@ -56,6 +56,7 @@ keys = [
     Key([mod], "t", lazy.spawn("tableplus")),
     Key([mod], "v", lazy.spawn("pavucontrol")),
     Key([mod], "c", lazy.spawn("emacsclient -c")),
+    Key([mod], "a", lazy.spawn("emacsclient -c -e '(org-agenda-list)'")),
     Key([mod], "w", lazy.spawn("brave")),
     Key(
         [mod, "control"],
@@ -99,6 +100,25 @@ keys = [
                     " Disconnect from Windows LTSC": 'virsh managedsave win-vm & killall virt-viewer & killall libvirtd & notify-send " VM suspended"',
                 },
                 dmenu_prompt="Virtual Machines",
+                dmenu_ignorecase=True,
+            )
+        ),
+    ),
+    Key(
+        [mod, "control"],
+        "q",
+        lazy.run_extension(
+            extension.CommandSet(
+                commands={
+                    "alacritty": "coproc emacsclient -c ~/.config/alacritty/alacritty.yml > /dev/null",
+                    "dunst": "coproc emacsclient -c ~/.config/dunst/dunstrc > /dev/null",
+                    "fish": "coproc emacsclient -c ~/.config/fish/config.fish > /dev/null",
+                    "fusuma": "coproc emacsclient -c ~/.config/fusuma/config.yml > /dev/null",
+                    "picom": "coproc emacsclient -c ~/.config/picom/picom.conf > /dev/null",
+                    "qtile": "coproc emacsclient -c ~/.config/qtile/config.py > /dev/null",
+                },
+                dmenu_prompt="Config Files",
+                dmenu_ignorecase=True,
             )
         ),
     ),
@@ -112,6 +132,7 @@ keys = [
                     " Disconnect all remote connections": 'remmina -q & notify-send "Remote disconnected"',
                 },
                 dmenu_prompt="Remote Connections",
+                dmenu_ignorecase=True,
             )
         ),
     ),
@@ -143,6 +164,7 @@ keys = [
                     " Suspend": "systemctl suspend",
                 },
                 dmenu_prompt="Power",
+                dmenu_ignorecase=True,
             )
         ),
     ),
@@ -210,7 +232,7 @@ groups = [
     ),
     Group(
         "0",
-        label="",
+        label="",
         layout="monadtall",
         spawn=["telegram-desktop", "signal-desktop-beta"],
         matches=[Match(wm_class="telegram-desktop"), Match(wm_class="signal beta")],
@@ -253,7 +275,7 @@ groups = [
 ]
 
 
-for group in groups[:-2]:
+for group in groups[:-1]:
     name = group.name
     keys.extend(
         [
@@ -261,19 +283,6 @@ for group in groups[:-2]:
             Key([mod, "shift"], name, lazy.window.togroup(name, switch_group=True)),
         ]
     )
-
-keys.extend(
-    [
-        Key(
-            [mod],
-            "equal",
-            lazy.group["equal"].toscreen(),
-            lazy.spawn(
-                "virsh start win-vm & virt-viewer -f --domain-name win-vm & notify-send ' VM connected'"
-            ),
-        )
-    ]
-)
 
 layout_theme = dict(
     border_width=3,
@@ -317,33 +326,17 @@ layouts = [
 
 widget_defaults = dict(
     font="DejaVu Sans Mono, Font Awesome 5 Pro, Font Awesome 5 Brands",
-    fontsize=11,
-    padding=5,
+    fontsize=12,
+    padding=10,
     foreground=get_color("foreground"),
 )
 
 extension_defaults = widget_defaults.copy()
 
 
-def get_graph_theme(key):
-    return dict(
-        line_width=1,
-        graph_color=get_color(key),
-        border_width=0,
-        background=get_color("grey"),
-        fill_color=get_color(key),
-        width=45,
-        samples=10,
-    )
-
-
-def toggle_keyboard(qtile):
-    return qtile.cmd_spawn([os.path.expanduser("~/.config/qtile/keyboard.sh")])
-
-
 def get_widgets():
     return [
-        widget.CurrentLayoutIcon(background=get_color("grey"), scale=0.5),
+        widget.CurrentLayoutIcon(background=get_color("grey"), scale=0.35, padding=5),
         widget.GroupBox(
             urgent_alert_method="line",
             highlight_method="line",
@@ -354,113 +347,96 @@ def get_widgets():
             other_screen_border=get_color("cyan"),
             inactive=get_color("yellow"),
             disable_drag=True,
-            borderwidth=2,
+            borderwidth=3,
             spacing=0,
-            padding=3,
+            padding_x=10,
         ),
-        widget.TaskList(
-            background=get_color("background"),
-            foreground=get_color("foreground"),
-            highlight_method="block",
-            margin=0,
-            icon_size=0,
-            border=get_color("grey"),
-            urgent_border=get_color("pink"),
-        ),
-        widget.Mpris2(
-            background=get_color("grey"),
-            objname="org.mpris.MediaPlayer2.spotify",
-            name="spotify",
-            display_metadata=["xesam:artist", "xesam:title"],
-            scroll_chars=10,
-            stop_pause_text="",
-        ),
-        widget.Systray(padding=3),
+        widget.WindowName(fontsize=0),
         widget.CheckUpdates(
             custom_command="checkupdates && paru -Qua 2>/dev/null",
-            colour_have_updates=get_color("pink"),
+            colour_have_updates=get_color("primary"),
             display_format=" {updates:>2}",
-            background=get_color("grey"),
+            # background=get_color("grey"),
         ),
-        # widget.GenPollText(
-        #     func=custom_widget.get_crypto,
-        #     foreground=get_color("yellow"),
-        #     update_interval=60,
-        # ),
+        widget.GenPollText(
+            func=custom_widget.get_spotify,
+            foreground=get_color("pink"),
+            update_interval=1,
+        ),
         widget.OpenWeather(
             location="london,uk",
             # location="hong kong",
             format="{location_city} {main_temp:.0f}°{units_temperature}",
-            foreground=get_color("orange"),
-            background=get_color("grey"),
-        ),
-        widget.GenPollText(
-            func=custom_widget.get_bluetooth,
-            foreground=get_color("cyan"),
-            update_interval=1,
-        ),
-        custom_widget.Net(
-            foreground=get_color("pink"),
-            background=get_color("grey"),
-            format="{down}↓↑{up}",
-            interface=helpers.get_interface(),
-        ),
-        custom_widget.Wlan(
             foreground=get_color("green"),
-            interface=helpers.get_interface(),
-            format="{icon}{essid}{vpn}",
+            # background=get_color("grey"),
         ),
-        widget.GenPollText(
-            func=custom_widget.get_im,
-            foreground=get_color("orange"),
-            background=get_color("grey"),
-            update_interval=1,
-            mouse_callbacks={"Button1": toggle_keyboard},
-        ),
+        # custom_widget.Wlan(
+        #     foreground=get_color("green"),
+        #     interface=helpers.get_interface(),
+        #     format="{icon}{essid}{vpn}",
+        # ),
+        # widget.GenPollText(
+        #     func=custom_widget.get_im,
+        #     foreground=get_color("orange"),
+        #     background=get_color("grey"),
+        #     update_interval=1,
+        #     mouse_callbacks={"Button1": toggle_keyboard},
+        # ),
         widget.GenPollText(
             func=custom_widget.get_ex,
             foreground=get_color("yellow"),
         ),
-        widget.CPUGraph(**get_graph_theme("green")),
-        widget.MemoryGraph(**get_graph_theme("cyan")),
-        widget.SwapGraph(**get_graph_theme("primary")),
+        custom_widget.Net(
+            foreground=get_color("orange"),
+            format="{down}↓↑{up}",
+            interface=helpers.get_interface(),
+            padding=5,
+        ),
         custom_widget.ThermalSensor(foreground=get_color("cyan")),
+        widget.Memory(format=" {MemPercent:2.0f}%", foreground=get_color("primary")),
         widget.Backlight(
-            format="{percent:2.0%}",
+            format=" {percent:2.0%}",
             foreground=get_color("pink"),
-            background=get_color("grey"),
+            # background=get_color("grey"),
             backlight_name="intel_backlight",
         ),
         widget.Battery(
-            format="{char}{percent:2.0%}",
+            format="{char} {percent:2.0%}",
             foreground=get_color("green"),
-            unknown_char="",
+            unknown_char="",
             charge_char="",
             empty_char="",
-            discharge_char="",
+            discharge_char="",
             full_char="",
             low_percentage=0.2,
             notify_below=0.2,
             update_interval=0.2,
         ),
         custom_widget.Volume(
-            width=15,
+            width=25,
             foreground=get_color("yellow"),
-            background=get_color("grey"),
+            # background=get_color("grey"),
         ),
         widget.Volume(
             # width=65,
+            padding=0,
             foreground=get_color("yellow"),
-            background=get_color("grey"),
+            # background=get_color("grey"),
             step=5,
         ),
-        widget.Clock(foreground=get_color("orange"), format="%b %d %a %l:%M%p"),
+        widget.Spacer(
+            length=10,
+            # background=get_color("grey"),
+        ),
+        widget.Clock(foreground=get_color("orange"), format="%d %b %a %l:%M%p"),
+        widget.Systray(padding=15),
+        widget.Spacer(length=10),
     ]
 
 
 screens = [
     Screen(
-        top=bar.Bar(get_widgets(), 24, background=get_color("background"), opacity=0.9)
+        top=bar.Bar(get_widgets(), 32, background=get_color("background"), opacity=0.9)
     )
     for _ in range(len(get_monitors()))
 ]
