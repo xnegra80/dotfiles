@@ -1,11 +1,10 @@
 from libqtile.config import Key, Screen, Group, Drag, Click, Match, ScratchPad, DropDown
 from libqtile.lazy import lazy
-from libqtile import layout, bar, widget, hook, extension
+from libqtile import layout, bar, widget, extension
 
 import helpers
 import custom_widget
 import os
-import subprocess
 from screeninfo import get_monitors
 
 mod = "mod4"
@@ -14,6 +13,7 @@ tui = "alacritty -e env COLUMNS= LINES= "
 
 autostart = [
     "picom --experimental-backends",
+    "rclone mount --allow-other --vfs-cache-mode full --vfs-cache-max-age 999d --vfs-read-chunk-size 8M --cache-writes --daemon x:/ ~/x",
     "nm-applet",
     "blueman-applet",
     "feh --bg-fill ~/Pictures/wallpaper",
@@ -24,7 +24,6 @@ autostart = [
     os.path.expanduser("~/.config/scripts/wait.sh"),
     "/usr/bin/lxpolkit",
     "sudo tzupdate",
-    "insync start",
     "redshift -l geoclue2" "echo 'enabled' > ~/.keyboard",
 ]
 
@@ -56,7 +55,12 @@ keys = [
     Key([mod], "t", lazy.spawn("tableplus")),
     Key([mod], "v", lazy.spawn("pavucontrol")),
     Key([mod], "c", lazy.spawn("emacsclient -c")),
-    Key([mod], "a", lazy.spawn("emacsclient -c -e '(org-agenda-list)'")),
+    Key(
+        [mod],
+        "a",
+        lazy.group["6"].toscreen(toggle=False),
+        lazy.spawn("emacsclient -c -e '(org-agenda-list)'"),
+    ),
     Key([mod], "w", lazy.spawn("brave")),
     Key(
         [mod, "control"],
@@ -82,6 +86,11 @@ keys = [
         [mod],
         "s",
         lazy.group["scratchpad"].dropdown_toggle("spotify"),
+    ),
+    Key(
+        [mod],
+        "m",
+        lazy.group["scratchpad"].dropdown_toggle("bashtop"),
     ),
     Key([mod], "e", lazy.group["scratchpad"].dropdown_toggle("ranger")),
     # CLI applications
@@ -258,7 +267,6 @@ groups = [
                 width=0.5,
                 x=0.25,
                 y=0.25,
-                # on_focus_lost_hide=False,
             ),
             DropDown(
                 "spotify",
@@ -268,7 +276,15 @@ groups = [
                 width=0.6,
                 x=0.2,
                 y=0.2,
-                # on_focus_lost_hide=False,
+            ),
+            DropDown(
+                "bashtop",
+                tui + "bashtop",
+                opacity=0.88,
+                height=0.6,
+                width=0.6,
+                x=0.2,
+                y=0.2,
             ),
         ],
     ),
@@ -359,7 +375,7 @@ def get_widgets():
             # background=get_color("grey"),
         ),
         widget.GenPollText(
-            func=custom_widget.get_spotify,
+            func=custom_widget.get_playing,
             foreground=get_color("pink"),
             update_interval=1,
         ),

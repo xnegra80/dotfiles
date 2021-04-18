@@ -113,6 +113,10 @@
   )
 
 (setq projectile-project-search-path "~/dev/")
+(setq projectile-sort-order 'modification-time)
+(setq projectile-enable-caching t)
+(setq lsp-auto-guess-root t)
+(setq lsp-pyright-typechecking-mode 'off)
 
 (setq all-the-icons-scale-factor 1.1)
 (after! doom-modeline
@@ -132,10 +136,12 @@
 (setq +workspaces-on-switch-project-behavior 'nil)
 
 (require 'elcord)
-(elcord-mode)
+;; (elcord-mode)
 
 (require 'org-wild-notifier)
 (org-wild-notifier-mode)
+(setq alert-default-style 'libnotify)
+
 
 (defun elcord--disable-elcord-if-no-frames (f)
     (declare (ignore f))
