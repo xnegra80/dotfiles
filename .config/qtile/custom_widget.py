@@ -109,17 +109,17 @@ class Net(Net):
 
 
 def get_playing():
-    status = helpers.bash_command("playerctl status")
+    status = helpers.bash_command("playerctl status -p spotify")
     if not status == "Playing":
         return ""
+
+    artist = helpers.bash_command("playerctl metadata xesam:artist -p spotify")
+    title = helpers.bash_command("playerctl metadata xesam:title -p spotify")
+    if artist:
+        title = re.sub(r" \([^()]*\)", "", title)
+        return f" {artist} - {title}"
     else:
-        artist = helpers.bash_command("playerctl metadata xesam:artist")
-        title = helpers.bash_command("playerctl metadata xesam:title")
-        if artist:
-            title = re.sub(r" \([^()]*\)", "", title)
-            return f" {artist} - {title}"
-        else:
-            return f" {title}"
+        return f" {title}"
 
 
 def get_crypto():

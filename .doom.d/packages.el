@@ -8,10 +8,10 @@
 
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;(package! some-package)
-(package! org-superstar)
 (package! org-wild-notifier)
 (package! csv-mode)
 (package! elcord)
+(package! grip-mode)
 (package! doas-edit
   :recipe (:host github :repo "cemkeylan/doas-edit"))
 

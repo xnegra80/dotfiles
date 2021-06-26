@@ -13,10 +13,10 @@ tui = "alacritty -e env COLUMNS= LINES= "
 
 autostart = [
     "picom --experimental-backends",
-    "rclone mount --allow-other --vfs-cache-mode full --vfs-cache-max-age 999d --vfs-read-chunk-size 8M --cache-writes --daemon x:/ ~/x",
     "nm-applet",
     "blueman-applet",
-    "feh --bg-fill ~/Pictures/wallpaper",
+    "transmission-gtk -m",
+    "feh --bg-fill ~/Pictures/wallpaper.png",
     "dunst",
     "ferdi",
     "fusuma -d",
@@ -24,7 +24,6 @@ autostart = [
     os.path.expanduser("~/.config/scripts/wait.sh"),
     "/usr/bin/lxpolkit",
     "sudo tzupdate",
-    "redshift -l geoclue2" "echo 'enabled' > ~/.keyboard",
 ]
 
 
@@ -61,19 +60,19 @@ keys = [
         lazy.group["6"].toscreen(toggle=False),
         lazy.spawn("emacsclient -c -e '(org-agenda-list)'"),
     ),
-    Key([mod], "w", lazy.spawn("brave")),
-    Key(
-        [mod, "control"],
-        "d",
-        lazy.group["discord"].toscreen(toggle=False),
-        lazy.spawn("discord"),
-    ),
-    Key(
-        [mod],
-        "m",
-        lazy.group["mailspring"].toscreen(toggle=False),
-        lazy.spawn("mailspring"),
-    ),
+    Key([mod], "w", lazy.spawn("brave --disable-features=SendMouseLeaveEvents")),
+    # Key(
+    #     [mod, "control"],
+    #     "d",
+    #     lazy.group["discord"].toscreen(toggle=False),
+    #     lazy.spawn("discord"),
+    # ),
+    # Key(
+    #     [mod],
+    #     "m",
+    #     lazy.group["mailspring"].toscreen(toggle=False),
+    #     lazy.spawn("mailspring"),
+    # ),
     Key(
         [mod],
         "p",
@@ -221,6 +220,10 @@ keys = [
     Key([], "XF86AudioLowerVolume", lazy.widget["volume"].decrease_vol()),
     Key([], "XF86AudioMute", lazy.widget["volume"].mute()),
     Key([mod, "shift"], "r", lazy.restart()),
+    Key([], "XF86AudioPlay", lazy.spawn("playerctl play-pause")),
+    Key([], "XF86AudioNext", lazy.spawn("playerctl next")),
+    Key([], "XF86AudioPrev", lazy.spawn("playerctl previous")),
+    Key([], "XF86AudioStop", lazy.spawn("playerctl stop")),
 ]
 
 groups = [
@@ -270,12 +273,12 @@ groups = [
             ),
             DropDown(
                 "spotify",
-                "spotify --force-device-scale-factor=.95",
-                opacity=0.95,
-                height=0.6,
-                width=0.6,
-                x=0.2,
-                y=0.2,
+                "spotify  --force-device-scale-factor=1",
+                opacity=0.88,
+                height=0.7,
+                width=0.7,
+                x=0.15,
+                y=0.15,
             ),
             DropDown(
                 "bashtop",
@@ -374,13 +377,14 @@ def get_widgets():
             display_format=" {updates:>2}",
             # background=get_color("grey"),
         ),
-        widget.GenPollText(
-            func=custom_widget.get_playing,
-            foreground=get_color("pink"),
-            update_interval=1,
-        ),
+        # widget.Mpris2(
+        #     objname="org.mpris.MediaPlayer2.spotify",
+        #     display_metadata=["xesam:title", "xesam:artist"],
+        #     foreground=get_color("pink"),
+        # ),
         widget.OpenWeather(
-            location="london,uk",
+            # location="london,uk",
+            location="durham,uk",
             # location="hong kong",
             format="{location_city} {main_temp:.0f}°{units_temperature}",
             foreground=get_color("green"),
@@ -410,11 +414,30 @@ def get_widgets():
         ),
         custom_widget.ThermalSensor(foreground=get_color("cyan")),
         widget.Memory(format=" {MemPercent:2.0f}%", foreground=get_color("primary")),
+        widget.NvidiaSensors(format=" {temp}°C", foreground=get_color("green")),
         widget.Backlight(
             format=" {percent:2.0%}",
             foreground=get_color("pink"),
             # background=get_color("grey"),
             backlight_name="intel_backlight",
+        ),
+        # custom_widget.Volume(
+        #     width=25,
+        #     foreground=get_color("yellow"),
+        #     # background=get_color("grey"),
+        # ),
+        #
+        widget.TextBox(text=" ", foreground=get_color("yellow"), padding=3),
+        widget.Volume(
+            # width=65,
+            padding=0,
+            foreground=get_color("yellow"),
+            # background=get_color("grey"),
+            step=5,
+        ),
+        widget.Spacer(
+            length=10,
+            # background=get_color("grey"),
         ),
         widget.Battery(
             format="{char} {percent:2.0%}",
@@ -427,22 +450,6 @@ def get_widgets():
             low_percentage=0.2,
             notify_below=0.2,
             update_interval=0.2,
-        ),
-        custom_widget.Volume(
-            width=25,
-            foreground=get_color("yellow"),
-            # background=get_color("grey"),
-        ),
-        widget.Volume(
-            # width=65,
-            padding=0,
-            foreground=get_color("yellow"),
-            # background=get_color("grey"),
-            step=5,
-        ),
-        widget.Spacer(
-            length=10,
-            # background=get_color("grey"),
         ),
         widget.Clock(foreground=get_color("orange"), format="%d %b %a %l:%M%p"),
         widget.Systray(padding=15),

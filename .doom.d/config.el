@@ -22,19 +22,22 @@
 (setq doom-font (font-spec :family "VictorMono Nerd Font" :size 15)
       doom-variable-pitch-font (font-spec :family "VictorMono Nerd Font" :size 15)
       doom-big-font (font-spec :family "VictorMono Nerd Font" :size 24)
+      doom-variable-pitch-font (font-spec :family "SourceCodePro")
+      doom-serif-font (font-spec :family "SourceCodePro")
+      doom-unicode-font (font-spec :family "Font Awesome 5 Pro")
 )
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-dracula)
-
+(setq org-fancy-priorities-list '("" "" "☕" ""))
 ;; Connect to main workspace on incomming emacsclient session
 (after! persp-mode
   (setq persp-emacsclient-init-frame-behaviour-override "main"))
 
 ;; whitespace
-(remove-hook 'after-change-major-mode-hook #'doom-highlight-non-default-indentation-h)
+;; (remove-hook 'after-change-major-mode-hook #'doom-highlight-non-default-indentation-h)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -42,8 +45,10 @@
 (setq org-hide-emphasis-markers t)
 
 (setq treemacs-position 'right)
-(require 'org-superstar)
-(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+
+;; (after! before-save-hook
+;;   (setq highlight-indent-guides-mode 'nil)
+;;   (setq highlight-indent-guides-mode 1))
 
 (defun org-checkbox-todo ()
   "Switch header TODO state to DONE when all checkboxes are ticked, to TODO otherwise"
@@ -76,11 +81,9 @@
 (setq display-line-numbers-type t)
 (setq scroll-step 1)
 (setq scroll-margin 1)
-(setq scroll-conservatively 9999)
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
 (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
 (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
-(setq scroll-step 1)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -100,9 +103,6 @@
      (t (comment-or-uncomment-region (line-beginning-position) (line-end-position))))));
 (map! "C-/" #'comment-or-uncomment-line-or-region )
 
-(after! evil-org
-  (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
-
 (after! ispell
   ;; Don't spellcheck org blocks
   (pushnew! ispell-skip-region-alist
@@ -112,11 +112,14 @@
 
   )
 
-(setq projectile-project-search-path "~/dev/")
+(setq projectile-project-search-path '"~/dev/")
 (setq projectile-sort-order 'modification-time)
 (setq projectile-enable-caching t)
-(setq lsp-auto-guess-root t)
+(setq projectile-file-exists-remote-cache-expire (* 10 60))
+(setq projectile-require-project-root nil)
+
 (setq lsp-pyright-typechecking-mode 'off)
+(setq vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
 
 (setq all-the-icons-scale-factor 1.1)
 (after! doom-modeline
@@ -132,7 +135,6 @@
     [remap doom/sudo-find-file] #'doas-edit-find-file
     [remap doom/sudo-this-file] #'doas-edit))
 
-(setq csv-separators '("," "	" ";"))
 (setq +workspaces-on-switch-project-behavior 'nil)
 
 (require 'elcord)
@@ -141,27 +143,6 @@
 (require 'org-wild-notifier)
 (org-wild-notifier-mode)
 (setq alert-default-style 'libnotify)
-
-
-(defun elcord--disable-elcord-if-no-frames (f)
-    (declare (ignore f))
-    (when (let ((frames (delete f (visible-frame-list))))
-            (or (null frames)
-                (and (null (cdr frames))
-                     (eq (car frames) terminal-frame))))
-      (elcord-mode -1)
-      (add-hook 'after-make-frame-functions 'elcord--enable-on-frame-created)))
-
-  (defun elcord--enable-on-frame-created ()
-    (declare (ignore f))
-    (elcord-mode +1))
-
-  (defun my/elcord-mode-hook ()
-    (if elcord-mode
-        (add-hook 'delete-frame-functions 'elcord--disable-elcord-if-no-frames)
-      (remove-hook 'delete-frame-functions 'elcord--disable-elcord-if-no-frames)))
-
-  (add-hook 'elcord-mode-hook 'my/elcord-mode-hook)
 (setq elcord-use-major-mode-as-main-icon 't)
 
 ;; (defun maybe-delete-frame-buffer (frame)

@@ -4,4 +4,8 @@
 [pull]
 	rebase = false
 [init]
-	defaultBranch = master
+	defaultBranch = main
+[github]
+	user = g0rdonL
+[push]
+	default = simple
